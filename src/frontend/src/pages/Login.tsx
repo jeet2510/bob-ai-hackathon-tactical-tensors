@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import {
@@ -16,7 +17,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
 
     if (isAuthenticated()) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/incidents" replace />;
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -36,7 +37,7 @@ export default function Login() {
                 response.data.user
             );
 
-            navigate("/dashboard", {
+            navigate("/incidents", {
                 replace: true,
             });
         } catch (error: any) {

@@ -3,23 +3,20 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Seeds only the operator accounts. The DVI records themselves come from
+     * the dataset via `php artisan dvi:ingest` — they are source evidence, not
+     * fixtures, and are deliberately not generated here.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'coordinator@dvi.test'],
+            ['name' => 'DVI Coordinator', 'password' => 'password'],
+        );
     }
 }

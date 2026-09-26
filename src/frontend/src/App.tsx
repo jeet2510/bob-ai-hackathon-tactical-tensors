@@ -1,37 +1,62 @@
-import { useEffect, useState } from "react";
-import api from "./api/client";
-import "./App.css";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import { isAuthenticated } from "./auth/auth";
 
-function App() {
-  const [message, setMessage] = useState("Connecting to Laravel...");
-  const [connected, setConnected] = useState(false);
+function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
 
-  useEffect(() => {
-    api
-      .get("/health")
-      .then((response) => {
-        console.log("Laravel response:", response.data);
-
-        setMessage(response.data.message);
-        setConnected(true);
-      })
-      .catch((error) => {
-        console.error("Laravel connection failed:", error);
-
-        setMessage("Unable to connect to Laravel backend.");
-        setConnected(false);
-      });
-  }, []);
-
-  return (
-    <main>
-      <h1>IBM Bob AI Hackathon</h1>
-
-      <div>
-        {connected ? "🟢" : "🔴"} {message}
-      </div>
-    </main>
-  );
+  return children;
 }
 
-export default App;
+export default function App() {
+  return (
+    <Routes>
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={
+              isAuthenticated()
+                ? "/dashboard"
+                : "/login"
+            }
+            replace
+          />
+        }
+      />
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
+
+    </Routes>
+  );
+}

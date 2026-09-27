@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { clearAuth, getStoredUser } from "../auth/auth";
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children, sidebar }: { children: ReactNode; sidebar?: ReactNode }) {
     const navigate = useNavigate();
     const user = getStoredUser();
 
@@ -20,23 +20,27 @@ export default function Layout({ children }: { children: ReactNode }) {
 
     return (
         <div className="shell">
-            <header className="topbar">
-                <div className="topbar-brand">
-                    <Link to="/incidents">
-                        <strong>DVI Coordinator</strong>
-                    </Link>
-                    <span>Disaster Victim Identification</span>
-                </div>
+            {sidebar && <aside className="sidebar">{sidebar}</aside>}
 
-                <div className="topbar-user">
-                    {user && <span>{user.name}</span>}
-                    <button className="btn btn-sm" onClick={handleLogout}>
-                        Sign out
-                    </button>
-                </div>
-            </header>
+            <div className="shell-main">
+                <header className="topbar">
+                    <div className="topbar-brand">
+                        <Link to="/incidents">
+                            <strong>DVI Coordinator</strong>
+                        </Link>
+                        <span>Disaster Victim Identification</span>
+                    </div>
 
-            <div className="page">{children}</div>
+                    <div className="topbar-user">
+                        {user && <span>{user.name}</span>}
+                        <button className="btn btn-sm" onClick={handleLogout}>
+                            Sign out
+                        </button>
+                    </div>
+                </header>
+
+                <div className="page">{children}</div>
+            </div>
         </div>
     );
 }

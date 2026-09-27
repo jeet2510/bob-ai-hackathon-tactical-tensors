@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/assignment', [SupportController::class, 'assignment']);
         Route::get('/report', [SupportController::class, 'report']);
+        Route::get('/photos', [SupportController::class, 'photos']);
 
         /*
         |------------------------------------------------------------------

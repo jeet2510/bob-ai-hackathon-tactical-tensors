@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasStringKey;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -42,5 +43,19 @@ class Incident extends Model
     public function latestRun(): ?MatchRun
     {
         return $this->matchRuns()->latest('created_at')->first();
+    }
+
+    /**
+     * Photographic evidence belonging to this incident's own bodies and
+     * family reports. photo_evidence has no incident_id of its own — it is
+     * scoped through record_type/record_id, one incident at a time.
+     */
+    public function photos(): Builder
+    {
+        return PhotoEvidence::query()->where(
+            fn (Builder $q) => $q
+                ->where(fn (Builder $p) => $p->where('record_type', 'PM')->whereIn('record_id', $this->pmCases()->select('pm_id')))
+                ->orWhere(fn (Builder $p) => $p->where('record_type', 'AM')->whereIn('record_id', $this->amFiles()->select('am_id')))
+        );
     }
 }

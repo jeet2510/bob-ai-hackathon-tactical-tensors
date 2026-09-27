@@ -31,6 +31,33 @@ export interface MatchRun {
     created_at: string;
 }
 
+/** Grouped counts behind the dashboard's charts — never individual rows. */
+export interface IncidentBreakdowns {
+    body_condition: Record<string, number>;
+    sex: Record<string, number>;
+    dna_status: Record<string, number>;
+    dental_status: Record<string, number>;
+    print_status: Record<string, number>;
+    recovered_by_day: Record<string, number>;
+    photos_by_modality: Record<string, number>;
+    photos_matchable: number;
+    photos_restricted: number;
+}
+
+/** One matchable photograph in the incident-wide gallery. Restricted face
+ *  photographs are never returned by this endpoint at all. */
+export interface GalleryPhoto {
+    photo_id: string;
+    record_type: "PM" | "AM";
+    record_id: string;
+    modality: string;
+    view: string | null;
+    captured_at: string | null;
+    source_type: string | null;
+    quality_flags: string[];
+    url: string;
+}
+
 export interface IncidentStats {
     bodies: number;
     profiles: number;

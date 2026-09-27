@@ -8,7 +8,14 @@ namespace App\Models\Concerns;
  */
 trait HasStringKey
 {
-    public $incrementing = false;
-
-    protected $keyType = 'string';
+    /**
+     * Set on construction rather than redeclared here: PHP 8.4 treats a
+     * trait property with a different default than the same property on
+     * Eloquent's own Model class as an incompatible composition and fatals.
+     */
+    public function initializeHasStringKey(): void
+    {
+        $this->incrementing = false;
+        $this->keyType = 'string';
+    }
 }

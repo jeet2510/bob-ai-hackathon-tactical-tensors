@@ -57,6 +57,35 @@ class SupportController extends Controller
     }
 
     /**
+     * The photographic record for the dashboard gallery.
+     *
+     * Only ever matchable photographs — never a restricted placeholder — the
+     * same rule BodyController enforces per-body, applied incident-wide.
+     */
+    public function photos(Request $request, Incident $incident)
+    {
+        $photos = $incident->photos()
+            ->matchable()
+            ->when($request->string('modality')->isNotEmpty(), fn ($q) => $q->where('modality', $request->string('modality')))
+            ->orderByDesc('captured_at')
+            ->limit(min((int) $request->integer('limit', 60), 200))
+            ->get()
+            ->map(fn (PhotoEvidence $p) => [
+                'photo_id' => $p->photo_id,
+                'record_type' => $p->record_type,
+                'record_id' => $p->record_id,
+                'modality' => $p->modality,
+                'view' => $p->view,
+                'captured_at' => $p->captured_at?->toDateTimeString(),
+                'source_type' => $p->source_type,
+                'quality_flags' => $p->qualityFlagList(),
+                'url' => "/api/photos/{$p->photo_id}/file",
+            ]);
+
+        return response()->json(['success' => true, 'photos' => $photos]);
+    }
+
+    /**
      * The global one-to-one solution, beside the per-body ranking.
      *
      * Where the two disagree is exactly where a look-alike cluster was

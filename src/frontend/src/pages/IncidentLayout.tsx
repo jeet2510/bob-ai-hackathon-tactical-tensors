@@ -3,7 +3,8 @@ import { NavLink, Outlet, useParams } from "react-router-dom";
 import api from "../api/client";
 import { toApiError } from "../api/errors";
 import Layout from "../components/Layout";
-import type { Incident, IncidentStats, MatchRun } from "../types";
+import { IconChart, IconClipboard, IconFile, IconGrid, IconTarget, IconUsers } from "../components/icons";
+import type { Incident, IncidentBreakdowns, IncidentStats, MatchRun } from "../types";
 import { LANGUAGE } from "../lib/format";
 
 interface IncidentContextValue {
@@ -11,6 +12,7 @@ interface IncidentContextValue {
     stats: IncidentStats;
     run: MatchRun | null;
     languages: Record<string, number>;
+    breakdowns: IncidentBreakdowns;
     refresh: () => Promise<void>;
 }
 
@@ -25,6 +27,18 @@ export function useIncident(): IncidentContextValue {
 
     return value;
 }
+
+const EMPTY_BREAKDOWNS: IncidentBreakdowns = {
+    body_condition: {},
+    sex: {},
+    dna_status: {},
+    dental_status: {},
+    print_status: {},
+    recovered_by_day: {},
+    photos_by_modality: {},
+    photos_matchable: 0,
+    photos_restricted: 0,
+};
 
 export default function IncidentLayout() {
     const { incidentId } = useParams();
@@ -42,6 +56,7 @@ export default function IncidentLayout() {
                 stats: data.stats,
                 run: data.run,
                 languages: data.languages ?? {},
+                breakdowns: data.breakdowns ?? EMPTY_BREAKDOWNS,
             });
             setError("");
         } catch (caught) {
@@ -72,15 +87,65 @@ export default function IncidentLayout() {
         );
     }
 
-    const { incident, run, languages } = state;
+    const { incident, stats, run, languages } = state;
     const base = `/incidents/${incident.incident_id}`;
 
     const languageSummary = Object.entries(languages)
         .map(([code, count]) => `${LANGUAGE[code] ?? code} ${count}`)
         .join(" · ");
 
+    const sidebar = (
+        <>
+            <div className="sidebar-incident">
+                <div className="faint">
+                    <NavLink to="/incidents">Incidents</NavLink>
+                </div>
+                <div className="sidebar-incident-name">{incident.name}</div>
+                <div className="mono faint">{incident.incident_id}</div>
+            </div>
+
+            <nav className="sidebar-nav">
+                <NavLink to={base} end className="sidebar-nav-link">
+                    <IconGrid /> Dashboard
+                </NavLink>
+                <NavLink to={`${base}/profiles`} className="sidebar-nav-link">
+                    <IconUsers /> Family reports
+                </NavLink>
+                <NavLink to={`${base}/assignment`} className="sidebar-nav-link">
+                    <IconTarget /> Assignment
+                </NavLink>
+                <NavLink to={`${base}/report`} className="sidebar-nav-link">
+                    <IconFile /> Reconciliation
+                </NavLink>
+                <NavLink to={`${base}/evaluation`} className="sidebar-nav-link">
+                    <IconChart /> Evaluation lab
+                </NavLink>
+                <NavLink to={`${base}/audit`} className="sidebar-nav-link">
+                    <IconClipboard /> Audit trail
+                </NavLink>
+            </nav>
+
+            <div className="sidebar-stats">
+                <div className="sidebar-stat">
+                    <span>Bodies</span>
+                    <strong>{stats.bodies}</strong>
+                </div>
+                <div className="sidebar-stat">
+                    <span>Family reports</span>
+                    <strong>{stats.profiles}</strong>
+                </div>
+                {stats.matched && (
+                    <div className="sidebar-stat">
+                        <span>Awaiting review</span>
+                        <strong>{stats.awaiting_review ?? 0}</strong>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+
     return (
-        <Layout>
+        <Layout sidebar={sidebar}>
             <div className="breadcrumb">
                 <NavLink to="/incidents">Incidents</NavLink> / {incident.incident_id}
             </div>
@@ -105,17 +170,6 @@ export default function IncidentLayout() {
                     incident is fabricated for development. No entry refers to a real casualty.
                 </div>
             )}
-
-            <nav className="tabs">
-                <NavLink to={base} end>
-                    Command board
-                </NavLink>
-                <NavLink to={`${base}/profiles`}>Family reports</NavLink>
-                <NavLink to={`${base}/assignment`}>Assignment</NavLink>
-                <NavLink to={`${base}/report`}>Reconciliation</NavLink>
-                <NavLink to={`${base}/evaluation`}>Evaluation lab</NavLink>
-                <NavLink to={`${base}/audit`}>Audit trail</NavLink>
-            </nav>
 
             <IncidentContext.Provider value={{ ...state, refresh }}>
                 <Outlet />

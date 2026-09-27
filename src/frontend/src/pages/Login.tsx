@@ -54,61 +54,78 @@ export default function Login() {
         <div className="login-page">
             <div className="login-card">
 
-                <div className="login-header">
-                    <h1>DVI Coordinator</h1>
-                    <p>Disaster Victim Identification</p>
+                <div className="login-tab">
+                    <span className="login-tab-code">FORM DVI&#8209;01 &middot; ACCESS</span>
+                    <span className="login-tab-status">
+                        <span className="login-tab-dot" aria-hidden="true" />
+                        System online
+                    </span>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-
-                    <div className="form-group">
-                        <label htmlFor="email">
-                            Email
-                        </label>
-
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(event) =>
-                                setEmail(event.target.value)
-                            }
-                            placeholder="Enter your email"
-                            required
-                        />
+                <div className="login-body">
+                    <div className="login-header">
+                        <h1>DVI Coordinator</h1>
+                        <p>Disaster Victim Identification &mdash; secure access</p>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password">
-                            Password
-                        </label>
+                    <form onSubmit={handleSubmit} className="login-form">
 
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(event) =>
-                                setPassword(event.target.value)
-                            }
-                            placeholder="Enter your password"
-                            required
-                        />
-                    </div>
+                        <div className="login-field">
+                            <label htmlFor="email">
+                                Email
+                            </label>
 
-                    {error && (
-                        <div className="login-error">
-                            {error}
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(event) =>
+                                    setEmail(event.target.value)
+                                }
+                                placeholder="you@agency.gov"
+                                autoComplete="username"
+                                required
+                            />
                         </div>
-                    )}
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Signing in..." : "Sign In"}
-                    </button>
+                        <div className="login-field">
+                            <label htmlFor="password">
+                                Password
+                            </label>
 
-                </form>
+                            <input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(event) =>
+                                    setPassword(event.target.value)
+                                }
+                                placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                                autoComplete="current-password"
+                                required
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="login-error" role="alert">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            className="login-submit"
+                            disabled={loading}
+                        >
+                            <span>{loading ? "Authenticating…" : "Sign in"}</span>
+                        </button>
+
+                    </form>
+
+                    <p className="login-footnote">
+                        Access to case records is logged and audited under chain&#8209;of&#8209;custody protocol.
+                    </p>
+                </div>
             </div>
         </div>
     );

@@ -1,3 +1,4 @@
+import AuthImage from "./AuthImage";
 import type { PhotoRow } from "../types";
 
 const MODALITY_LABEL: Record<string, string> = {
@@ -34,7 +35,7 @@ export default function PhotoStrip({ photos }: { photos: PhotoRow[] }) {
                             <span>Facial photographs are never displayed or matched.</span>
                         </div>
                     ) : (
-                        <img src={photo.url ?? ""} alt={MODALITY_LABEL[photo.modality] ?? photo.modality} loading="lazy" />
+                        <AuthImage src={photo.url ?? ""} alt={MODALITY_LABEL[photo.modality] ?? photo.modality} />
                     )}
 
                     <figcaption>

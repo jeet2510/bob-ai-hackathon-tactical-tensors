@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../api/client";
 import { toApiError } from "../../api/errors";
+import PhotoGallery from "../../components/PhotoGallery";
+import {
+    BodyConditionChart,
+    EvidenceBandBar,
+    LanguageBars,
+    ReadinessChart,
+    RecoveryTimelineChart,
+} from "../../components/charts/DashboardCharts";
 import { useIncident } from "../IncidentLayout";
 import { BAND_CLASS, BAND_LABEL, DECISION_LABEL, signed } from "../../lib/format";
 import type { BodyRow, ConfidenceBand } from "../../types";
@@ -9,7 +17,7 @@ import type { BodyRow, ConfidenceBand } from "../../types";
 const BANDS: ConfidenceBand[] = ["high", "moderate", "low", "no_credible_candidate"];
 
 export default function CommandBoard() {
-    const { incident, stats } = useIncident();
+    const { incident, stats, breakdowns, languages } = useIncident();
 
     const [bodies, setBodies] = useState<BodyRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -71,6 +79,42 @@ export default function CommandBoard() {
                     with what is currently held — a sample needs collecting before ranking can help them.
                 </div>
             )}
+
+            <div className="dashboard-grid">
+                <section className="card chart-card chart-card-wide">
+                    <h3>Bodies by strongest-candidate evidence</h3>
+                    <p className="muted">Part-to-whole across every recovered body.</p>
+                    <EvidenceBandBar stats={stats} />
+                </section>
+
+                <section className="card chart-card">
+                    <h3>Primary-identifier readiness</h3>
+                    <p className="muted">DNA, dental and print status across all bodies.</p>
+                    <ReadinessChart breakdowns={breakdowns} />
+                </section>
+
+                <section className="card chart-card">
+                    <h3>Body condition on recovery</h3>
+                    <p className="muted">Drives how much of each description can be trusted.</p>
+                    <BodyConditionChart breakdowns={breakdowns} />
+                </section>
+
+                <section className="card chart-card">
+                    <h3>Bodies recovered per day</h3>
+                    <p className="muted">Recovery-scene timeline for the incident.</p>
+                    <RecoveryTimelineChart breakdowns={breakdowns} />
+                </section>
+
+                <section className="card chart-card">
+                    <h3>Form boxes by language</h3>
+                    <p className="muted">What language each source record was written in.</p>
+                    <LanguageBars languages={languages} />
+                </section>
+            </div>
+
+            <PhotoGallery incidentId={incident.incident_id} />
+
+            <h2 style={{ marginTop: 28, marginBottom: 14 }}>Case triage</h2>
 
             <div className="toolbar">
                 <input

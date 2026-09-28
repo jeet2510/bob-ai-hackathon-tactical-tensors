@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import { fetchInsight } from "../../api/assistant";
 import { toApiError } from "../../api/errors";
+import AiMessage from "../../components/AiMessage";
 import PhotoGallery from "../../components/PhotoGallery";
 import {
     BodyConditionChart,
@@ -301,7 +302,7 @@ function IncidentInsightCard({ incidentId }: { incidentId: string }) {
             </div>
 
             {notice && <div className="notice">{notice}</div>}
-            {text && <p>{text}</p>}
+            {text && <AiMessage text={text} incidentId={incidentId} />}
         </section>
     );
 }

@@ -1084,6 +1084,19 @@ td.tbl-actions .btn-row {
     border-color: transparent;
 }
 
+.chip-link {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: transparent;
+    font-weight: 500;
+    transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+
+.chip-link:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+
 details.breakdown {
     margin-top: 16px;
 }

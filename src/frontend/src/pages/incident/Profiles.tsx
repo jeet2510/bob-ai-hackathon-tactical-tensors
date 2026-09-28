@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/client";
 import { getShareLink } from "../../api/reports";
 import { toApiError } from "../../api/errors";
@@ -9,9 +9,12 @@ import type { AmFile } from "../../types";
 export default function Profiles() {
     const { incident } = useIncident();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [profiles, setProfiles] = useState<AmFile[]>([]);
-    const [search, setSearch] = useState("");
+    // A DVI Assistant "Open AM-…" reference deep-links here with ?q= so the
+    // list is already filtered to that one profile on arrival.
+    const [search, setSearch] = useState(searchParams.get("q") ?? "");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [shareUrl, setShareUrl] = useState("");

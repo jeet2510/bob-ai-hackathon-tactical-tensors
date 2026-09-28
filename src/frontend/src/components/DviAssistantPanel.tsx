@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { askAssistant } from "../api/assistant";
 import { toApiError } from "../api/errors";
+import AiMessage from "./AiMessage";
 import { IconClose, IconSend } from "./icons";
 import type { AssistantTurn } from "../types";
 
@@ -116,7 +117,11 @@ export default function DviAssistantPanel({ open, onClose }: { open: boolean; on
 
                             {messages.map((m, i) => (
                                 <div key={i} className={`assistant-message assistant-message-${m.role}`}>
-                                    {m.text}
+                                    {m.role === "assistant" ? (
+                                        <AiMessage text={m.text} incidentId={incidentId} onNavigate={onClose} />
+                                    ) : (
+                                        m.text
+                                    )}
                                 </div>
                             ))}
 

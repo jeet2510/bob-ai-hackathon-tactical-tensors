@@ -1,6 +1,6 @@
 import axios from "axios";
 import api from "./client";
-import type { AmFile, AmReportFormState, ReportContext, ShareLinkResult } from "../types";
+import type { AmFile, AmReportFormState, ReportContext, ShareLinkResult, ScanResult } from "../types";
 
 /** Empty form state for a fresh ante-mortem report — every section blank. */
 export function emptyAmReportForm(): AmReportFormState {
@@ -94,6 +94,25 @@ export function buildAmReportPayload(form: AmReportFormState): Record<string, un
 }
 
 const multipart = { headers: { "Content-Type": "multipart/form-data" } };
+
+/**
+ * Scan a filled paper ante-mortem report (PDF / photo).
+ *
+ * Re-uses the post-mortem scan-pdf endpoint — the form schema covers
+ * physical appearance, clothing and distinguishing features, which are
+ * shared across both form types. The AI returns the same field names;
+ * NewProfile.tsx maps what's relevant into the AM form state.
+ */
+export function scanAmReportPdf(incidentId: string, file: File) {
+    const data = new FormData();
+    data.append("file", file);
+
+    return api.post<ScanResult>(
+        `/incidents/${incidentId}/bodies/scan-pdf`,
+        data,
+        multipart,
+    );
+}
 
 /** A bare axios instance (no auth interceptor, no base auth headers) for the
  * public share-link endpoints — these are reached by a family member who is

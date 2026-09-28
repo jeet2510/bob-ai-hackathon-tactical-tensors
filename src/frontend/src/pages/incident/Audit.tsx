@@ -57,6 +57,7 @@ export default function Audit() {
                                 <th>Pairing</th>
                                 <th>Reviewer</th>
                                 <th>Note</th>
+                                <th />
                             </tr>
                         </thead>
                         <tbody>
@@ -76,9 +77,38 @@ export default function Audit() {
                                             {DECISION_LABEL[d.decision]}
                                         </span>
                                     </td>
-                                    <td className="mono">{d.am_id ?? "—"}</td>
+                                    <td>
+                                        {d.am_id ? (
+                                            <Link
+                                                className="mono"
+                                                to={`/incidents/${incident.incident_id}/profiles/${d.am_id}`}
+                                            >
+                                                {d.am_id}
+                                            </Link>
+                                        ) : (
+                                            <span className="faint">—</span>
+                                        )}
+                                    </td>
                                     <td>{d.reviewer}</td>
                                     <td className="muted">{d.note ?? "—"}</td>
+                                    <td className="tbl-actions">
+                                        <div className="btn-row">
+                                            <Link
+                                                className="btn btn-sm"
+                                                to={`/incidents/${incident.incident_id}/bodies/${d.pm_id}`}
+                                            >
+                                                View body
+                                            </Link>
+                                            {d.am_id && (
+                                                <Link
+                                                    className="btn btn-sm"
+                                                    to={`/incidents/${incident.incident_id}/profiles/${d.am_id}`}
+                                                >
+                                                    View profile
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

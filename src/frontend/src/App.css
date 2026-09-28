@@ -752,6 +752,33 @@ tbody tr:hover {
     background: var(--surface-2);
 }
 
+/* clickable table rows */
+tbody tr.row-clickable {
+    cursor: pointer;
+}
+
+tbody tr.row-clickable:hover {
+    background: var(--accent-soft);
+}
+
+tbody tr.row-clickable:active {
+    background: color-mix(in srgb, var(--accent-soft) 80%, transparent);
+}
+
+/* action-button cell — right-aligned, no wrap, minimal padding */
+td.tbl-actions {
+    white-space: nowrap;
+    text-align: right;
+    vertical-align: middle;
+    width: 1%;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+td.tbl-actions .btn-row {
+    justify-content: flex-end;
+}
+
 /* --------------------------------------------------------------- Badges */
 
 .badge {
@@ -1911,6 +1938,122 @@ details.breakdown > div {
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
+}
+
+/* -------------------------------------------------- AM scan upload panel */
+
+.am-scan-panel {
+    margin-bottom: 22px;
+    border-color: var(--border-strong);
+}
+
+.scan-panel-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.scan-panel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.scan-panel-header h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.scan-panel-header p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.scan-dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+    border: 2px dashed var(--border-strong);
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+    user-select: none;
+}
+
+.scan-dropzone:hover:not(.scan-dropzone--busy),
+.scan-dropzone:focus-visible:not(.scan-dropzone--busy) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.scan-dropzone--busy {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.scan-dropzone-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px;
+    text-align: center;
+}
+
+.scan-dropzone-upload-icon {
+    color: var(--text-faint);
+    flex-shrink: 0;
+}
+
+.scan-dropzone-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.scan-dropzone-hint {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+}
+
+/* animated loading bars shown while AI is reading */
+.scan-busy-bars {
+    display: flex;
+    gap: 5px;
+    align-items: flex-end;
+    height: 24px;
+}
+
+.scan-busy-bars span {
+    display: block;
+    width: 6px;
+    background: var(--accent);
+    animation: scan-bar-bounce 0.9s ease-in-out infinite;
+}
+
+.scan-busy-bars span:nth-child(1) { animation-delay: 0s;    height: 40%; }
+.scan-busy-bars span:nth-child(2) { animation-delay: 0.15s; height: 70%; }
+.scan-busy-bars span:nth-child(3) { animation-delay: 0.3s;  height: 55%; }
+.scan-busy-bars span:nth-child(4) { animation-delay: 0.45s; height: 80%; }
+
+@keyframes scan-bar-bounce {
+    0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+    50%       { transform: scaleY(1);   opacity: 1;   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scan-busy-bars span { animation: none; opacity: 0.6; }
 }
 
 /* ------------------------------------------------------------- FDI grid */

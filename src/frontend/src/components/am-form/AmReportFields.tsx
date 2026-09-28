@@ -1,3 +1,4 @@
+import type React from "react";
 import ClothingTable from "../body-form/ClothingTable";
 import FeaturesTable from "../body-form/FeaturesTable";
 import { IdDocumentsTable, JewelleryTable } from "../body-form/RepeatableSections";
@@ -30,6 +31,7 @@ export default function AmReportFields({
     uploadingPhoto,
     onUploadRecentPhoto,
     onUploadTattooPhoto,
+    badge,
 }: {
     form: AmReportFormState;
     setField: (name: string, value: string) => void;
@@ -39,6 +41,8 @@ export default function AmReportFields({
     uploadingPhoto: "recent" | "tattoo" | null;
     onUploadRecentPhoto: (file: File) => void;
     onUploadTattooPhoto: (file: File) => void;
+    /** Optional function returning an AI badge node for a given field name */
+    badge?: (name: string) => React.ReactNode;
 }) {
     return (
         <>
@@ -57,24 +61,24 @@ export default function AmReportFields({
             <section className="form-section card" id="am-section-B">
                 <SectionHeader letter="B" title="Biological profile" description="Best estimate is fine." />
                 <div className="form-grid form-grid-narrow">
-                    <SelectField label="Sex" name="sex" value={form.sex} onChange={setField} options={PM_SEX_OPTIONS} error={fieldErrors.sex} />
-                    <TextField label="Age (years)" name="age" type="number" value={form.age} onChange={setField} error={fieldErrors.age} />
-                    <TextField label="Height" name="height_text" value={form.height_text} onChange={setField} placeholder='e.g. "5 ft 7 in" or cm' />
+                    <SelectField label="Sex" name="sex" value={form.sex} onChange={setField} options={PM_SEX_OPTIONS} error={fieldErrors.sex} badge={badge?.("sex")} />
+                    <TextField label="Age (years)" name="age" type="number" value={form.age} onChange={setField} error={fieldErrors.age} badge={badge?.("age")} />
+                    <TextField label="Height" name="height_text" value={form.height_text} onChange={setField} placeholder='e.g. "5 ft 7 in" or cm' badge={badge?.("height_text")} />
                 </div>
             </section>
 
             <section className="form-section card" id="am-section-C">
                 <SectionHeader letter="C" title="Physical appearance" />
                 <div className="form-grid form-grid-narrow">
-                    <SelectField label="Skin tone" name="skin_tone" value={form.skin_tone} onChange={setField} options={SKIN_TONE_OPTIONS} />
+                    <SelectField label="Skin tone" name="skin_tone" value={form.skin_tone} onChange={setField} options={SKIN_TONE_OPTIONS} badge={badge?.("skin_tone")} />
                     {form.skin_tone === "Other" && (
                         <TextField label="Skin tone, other" name="skin_tone_other" value={form.skin_tone_other} onChange={setField} />
                     )}
-                    <SelectField label="Build" name="build" value={form.build} onChange={setField} options={BUILD_OPTIONS} />
-                    <SelectField label="Hair colour" name="hair_colour" value={form.hair_colour} onChange={setField} options={HAIR_COLOUR_OPTIONS} />
-                    <SelectField label="Hair length" name="hair_length" value={form.hair_length} onChange={setField} options={HAIR_LENGTH_OPTIONS} />
-                    <SelectField label="Eye colour" name="eye_colour" value={form.eye_colour} onChange={setField} options={EYE_COLOUR_OPTIONS} />
-                    <SelectField label="Facial hair" name="facial_hair" value={form.facial_hair} onChange={setField} options={FACIAL_HAIR_OPTIONS} />
+                    <SelectField label="Build" name="build" value={form.build} onChange={setField} options={BUILD_OPTIONS} badge={badge?.("build")} />
+                    <SelectField label="Hair colour" name="hair_colour" value={form.hair_colour} onChange={setField} options={HAIR_COLOUR_OPTIONS} badge={badge?.("hair_colour")} />
+                    <SelectField label="Hair length" name="hair_length" value={form.hair_length} onChange={setField} options={HAIR_LENGTH_OPTIONS} badge={badge?.("hair_length")} />
+                    <SelectField label="Eye colour" name="eye_colour" value={form.eye_colour} onChange={setField} options={EYE_COLOUR_OPTIONS} badge={badge?.("eye_colour")} />
+                    <SelectField label="Facial hair" name="facial_hair" value={form.facial_hair} onChange={setField} options={FACIAL_HAIR_OPTIONS} badge={badge?.("facial_hair")} />
                 </div>
             </section>
 

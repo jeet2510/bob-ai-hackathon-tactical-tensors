@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { toApiError } from "../api/errors";
 import Layout from "../components/Layout";
 import type { Incident } from "../types";
 
 export default function Incidents() {
+    const navigate = useNavigate();
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -52,14 +53,22 @@ export default function Incidents() {
                                 <th>District</th>
                                 <th>Bodies</th>
                                 <th>Family reports</th>
+                                <th />
                             </tr>
                         </thead>
                         <tbody>
                             {incidents.map((incident) => (
-                                <tr key={incident.incident_id}>
+                                <tr
+                                    key={incident.incident_id}
+                                    className="row-clickable"
+                                    onClick={() => navigate(`/incidents/${incident.incident_id}`)}
+                                >
                                     <td className="mono">{incident.incident_id}</td>
                                     <td>
-                                        <Link to={`/incidents/${incident.incident_id}`}>
+                                        <Link
+                                            to={`/incidents/${incident.incident_id}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             {incident.name}
                                         </Link>
                                         {incident.synthetic && (
@@ -73,6 +82,15 @@ export default function Incidents() {
                                     <td>{incident.district ?? "—"}</td>
                                     <td>{incident.pm_cases_count ?? 0}</td>
                                     <td>{incident.am_files_count ?? 0}</td>
+                                    <td className="tbl-actions">
+                                        <Link
+                                            className="btn btn-sm"
+                                            to={`/incidents/${incident.incident_id}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            Open
+                                        </Link>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

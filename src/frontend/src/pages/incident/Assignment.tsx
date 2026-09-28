@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import { toApiError } from "../../api/errors";
 import { useIncident } from "../IncidentLayout";
@@ -18,6 +18,7 @@ import type { AssignmentRow } from "../../types";
  */
 export default function Assignment() {
     const { incident } = useIncident();
+    const navigate = useNavigate();
 
     const [rows, setRows] = useState<AssignmentRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -79,15 +80,33 @@ export default function Assignment() {
                     </thead>
                     <tbody>
                         {shown.map((row) => (
-                            <tr key={row.pm_id} className={row.differs ? "row-flagged" : ""}>
-                                <td className="mono">{row.pm_id}</td>
+                            <tr
+                                key={row.pm_id}
+                                className={`row-clickable${row.differs ? " row-flagged" : ""}`}
+                                onClick={() => navigate(`/incidents/${incident.incident_id}/bodies/${row.pm_id}`)}
+                            >
+                                <td>
+                                    <Link
+                                        className="mono"
+                                        to={`/incidents/${incident.incident_id}/bodies/${row.pm_id}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {row.pm_id}
+                                    </Link>
+                                </td>
                                 <td>
                                     {row.ranked_first ? (
                                         <>
                                             {row.ranked_first.reported_name ?? row.ranked_first.am_id}
                                             <div className="faint">
-                                                <span className="mono">{row.ranked_first.am_id}</span> ·{" "}
-                                                {signed(row.ranked_first.score)}
+                                                <Link
+                                                    className="mono"
+                                                    to={`/incidents/${incident.incident_id}/profiles/${row.ranked_first.am_id}`}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {row.ranked_first.am_id}
+                                                </Link>
+                                                {" "}· {signed(row.ranked_first.score)}
                                             </div>
                                         </>
                                     ) : (
@@ -99,8 +118,14 @@ export default function Assignment() {
                                         <>
                                             {row.assigned.reported_name ?? row.assigned.am_id}
                                             <div className="faint">
-                                                <span className="mono">{row.assigned.am_id}</span> ·{" "}
-                                                {signed(row.assigned.score)}
+                                                <Link
+                                                    className="mono"
+                                                    to={`/incidents/${incident.incident_id}/profiles/${row.assigned.am_id}`}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {row.assigned.am_id}
+                                                </Link>
+                                                {" "}· {signed(row.assigned.score)}
                                             </div>
                                             <span
                                                 className={`badge badge-${BAND_CLASS[row.assigned.confidence_band]}`}
@@ -112,12 +137,13 @@ export default function Assignment() {
                                         <span className="faint">unassigned</span>
                                     )}
                                 </td>
-                                <td>
+                                <td className="tbl-actions">
                                     <Link
                                         className="btn btn-sm"
                                         to={`/incidents/${incident.incident_id}/bodies/${row.pm_id}`}
+                                        onClick={(e) => e.stopPropagation()}
                                     >
-                                        Review
+                                        View / Edit
                                     </Link>
                                 </td>
                             </tr>

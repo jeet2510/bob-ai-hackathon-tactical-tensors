@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import { getShareLink } from "../../api/reports";
 import { toApiError } from "../../api/errors";
@@ -8,6 +8,7 @@ import type { AmFile } from "../../types";
 
 export default function Profiles() {
     const { incident } = useIncident();
+    const navigate = useNavigate();
 
     const [profiles, setProfiles] = useState<AmFile[]>([]);
     const [search, setSearch] = useState("");
@@ -135,11 +136,16 @@ export default function Profiles() {
                                 <th>Reported by</th>
                                 <th>Last seen</th>
                                 <th>Reference samples</th>
+                                <th />
                             </tr>
                         </thead>
                         <tbody>
                             {profiles.map((profile) => (
-                                <tr key={profile.am_id}>
+                                <tr
+                                    key={profile.am_id}
+                                    className="row-clickable"
+                                    onClick={() => navigate(`/incidents/${incident.incident_id}/profiles/${profile.am_id}`)}
+                                >
                                     <td className="mono">{profile.am_id}</td>
                                     <td>{profile.reported_name}</td>
                                     <td>
@@ -176,6 +182,15 @@ export default function Profiles() {
                                                     <span className="chip chip-conflict">none</span>
                                                 )}
                                         </div>
+                                    </td>
+                                    <td className="tbl-actions">
+                                        <Link
+                                            className="btn btn-sm"
+                                            to={`/incidents/${incident.incident_id}/profiles/${profile.am_id}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            View / Edit
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

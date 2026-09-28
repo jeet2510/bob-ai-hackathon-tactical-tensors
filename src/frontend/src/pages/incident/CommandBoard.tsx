@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import { toApiError } from "../../api/errors";
 import PhotoGallery from "../../components/PhotoGallery";
@@ -18,6 +18,7 @@ const BANDS: ConfidenceBand[] = ["high", "moderate", "low", "no_credible_candida
 
 export default function CommandBoard() {
     const { incident, stats, breakdowns, languages } = useIncident();
+    const navigate = useNavigate();
 
     const [bodies, setBodies] = useState<BodyRow[]>([]);
     const [loading, setLoading] = useState(true);
@@ -156,7 +157,11 @@ export default function CommandBoard() {
                         </thead>
                         <tbody>
                             {bodies.map((body) => (
-                                <tr key={body.pm_id}>
+                                <tr
+                                    key={body.pm_id}
+                                    className="row-clickable"
+                                    onClick={() => navigate(`/incidents/${incident.incident_id}/bodies/${body.pm_id}`)}
+                                >
                                     <td>
                                         <span className="mono">{body.pm_id}</span>
                                         {body.degraded && (
@@ -219,12 +224,13 @@ export default function CommandBoard() {
                                             <span className="faint">pending</span>
                                         )}
                                     </td>
-                                    <td>
+                                    <td className="tbl-actions">
                                         <Link
                                             className="btn btn-sm"
                                             to={`/incidents/${incident.incident_id}/bodies/${body.pm_id}`}
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            Open
+                                            View / Edit
                                         </Link>
                                     </td>
                                 </tr>

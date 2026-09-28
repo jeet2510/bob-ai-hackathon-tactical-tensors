@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/client";
 import { toApiError } from "../../api/errors";
 import { useIncident } from "../IncidentLayout";
@@ -110,7 +111,7 @@ export default function EvaluationLab() {
             ))}
 
             {endToEnd && runs[endToEnd][split] && (
-                <Breakdowns metrics={runs[endToEnd][split]} />
+                <Breakdowns metrics={runs[endToEnd][split]} incidentId={incident.incident_id} />
             )}
 
             <div className="card" style={{ marginTop: 18 }}>
@@ -271,7 +272,7 @@ function PrfTable({
     );
 }
 
-function Breakdowns({ metrics }: { metrics: EvaluationMetrics }) {
+function Breakdowns({ metrics, incidentId }: { metrics: EvaluationMetrics; incidentId: string }) {
     return (
         <>
             <h3 style={{ margin: "28px 0 12px" }}>Where it struggles</h3>
@@ -289,28 +290,62 @@ function Breakdowns({ metrics }: { metrics: EvaluationMetrics }) {
                     <div className="table-wrap">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Body</th>
-                                    <th>True partner</th>
-                                    <th>Ranked first instead</th>
-                                    <th>True rank</th>
-                                    <th>Why it is hard</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {metrics.misses.map((m) => (
-                                    <tr key={m.pm_id}>
-                                        <td className="mono">{m.pm_id}</td>
-                                        <td className="mono">{m.expected}</td>
-                                        <td className="mono">{m.got ?? "—"}</td>
-                                        <td>{m.true_rank ?? "never offered"}</td>
-                                        <td className="muted">
-                                            {m.case_type}
-                                            {m.tags && ` · ${m.tags.replace(/,/g, ", ")}`}
-                                        </td>
+                                    <tr>
+                                        <th>Body</th>
+                                        <th>True partner</th>
+                                        <th>Ranked first instead</th>
+                                        <th>True rank</th>
+                                        <th>Why it is hard</th>
+                                        <th />
                                     </tr>
-                                ))}
-                            </tbody>
+                                </thead>
+                                <tbody>
+                                    {metrics.misses.map((m) => (
+                                        <tr key={m.pm_id}>
+                                            <td>
+                                                <Link
+                                                    className="mono"
+                                                    to={`/incidents/${incidentId}/bodies/${m.pm_id}`}
+                                                >
+                                                    {m.pm_id}
+                                                </Link>
+                                            </td>
+                                            <td>
+                                                <Link
+                                                    className="mono"
+                                                    to={`/incidents/${incidentId}/profiles/${m.expected}`}
+                                                >
+                                                    {m.expected}
+                                                </Link>
+                                            </td>
+                                            <td>
+                                                {m.got ? (
+                                                    <Link
+                                                        className="mono"
+                                                        to={`/incidents/${incidentId}/profiles/${m.got}`}
+                                                    >
+                                                        {m.got}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="faint">—</span>
+                                                )}
+                                            </td>
+                                            <td>{m.true_rank ?? "never offered"}</td>
+                                            <td className="muted">
+                                                {m.case_type}
+                                                {m.tags && ` · ${m.tags.replace(/,/g, ", ")}`}
+                                            </td>
+                                            <td className="tbl-actions">
+                                                <Link
+                                                    className="btn btn-sm"
+                                                    to={`/incidents/${incidentId}/bodies/${m.pm_id}`}
+                                                >
+                                                    View body
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
                         </table>
                     </div>
                 </div>

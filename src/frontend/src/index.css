@@ -1,37 +1,58 @@
 :root {
-    /* Operational tool palette: low-chroma surfaces so the confidence colours
-       are the only saturated thing on screen. */
-    --bg: #f7f7f8;
+    /* Operational tool palette — IBM Carbon inspired, tuned for a
+       low-chroma neutral scale so the confidence colours (high / moderate /
+       low / danger) stay the only saturated thing on screen. Values are
+       drawn from Carbon's Gray/Blue/Green/Gold/Red ramps, then softened
+       (borders over shadows, a touch of radius) for a modern read. */
+    --bg: #f4f4f4;
     --surface: #ffffff;
-    --surface-2: #f2f2f4;
-    --border: #dedee2;
-    --border-strong: #c3c3ca;
+    --surface-2: #e8e8e8;
+    --border: #e0e0e0;
+    --border-strong: #c6c6c6;
 
-    --text: #1b1b1f;
-    --text-muted: #63636e;
-    --text-faint: #8b8b96;
+    --text: #161616;
+    --text-muted: #525252;
+    --text-faint: #8d8d8d;
 
-    --accent: #1d4ed8;
+    --accent: #0f62fe;
+    --accent-hover: #0043ce;
     --accent-text: #ffffff;
-    --accent-soft: #e8eeff;
+    --accent-soft: #edf5ff;
 
-    --high: #15803d;
-    --high-soft: #e3f5e9;
-    --moderate: #a16207;
-    --moderate-soft: #fbf1dc;
-    --low: #6b6b76;
-    --low-soft: #eeeef1;
-    --danger: #b91c1c;
-    --danger-soft: #fdeaea;
+    --high: #198038;
+    --high-soft: #defbe6;
+    --moderate: #8a5b00;
+    --moderate-soft: #fcf4d6;
+    --low: #525252;
+    --low-soft: #e8e8e8;
+    --danger: #da1e28;
+    --danger-soft: #fff1f1;
 
-    --radius: 8px;
-    --radius-sm: 5px;
+    /* The UI shell (top bar + side rail) stays a fixed dark charcoal in
+       both themes — the recognisable Carbon "productive" shell — while
+       the content surfaces below respond to light/dark mode. */
+    --shell-bg: #161616;
+    --shell-bg-hover: #262626;
+    --shell-bg-active: #353535;
+    --shell-border: #393939;
+    --shell-text: #f4f4f4;
+    --shell-text-muted: #a8a8a8;
+    --shell-text-faint: #6f6f6f;
+    --shell-accent: #4589ff;
 
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --radius: 4px;
+    --radius-sm: 0px;
+    --radius-pill: 999px;
+
+    --ease: cubic-bezier(0.2, 0, 0.38, 0.9);
+    --duration-fast: 110ms;
+    --duration-moderate: 200ms;
+
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
     font-family: var(--sans);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     color: var(--text);
     background: var(--bg);
@@ -41,28 +62,29 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: #131317;
-        --surface: #1b1b21;
-        --surface-2: #232329;
-        --border: #313139;
-        --border-strong: #45454f;
+        --bg: #161616;
+        --surface: #262626;
+        --surface-2: #393939;
+        --border: #393939;
+        --border-strong: #525252;
 
-        --text: #f0f0f3;
-        --text-muted: #a3a3af;
-        --text-faint: #7b7b88;
+        --text: #f4f4f4;
+        --text-muted: #c6c6c6;
+        --text-faint: #8d8d8d;
 
-        --accent: #6f9bff;
-        --accent-text: #0d1424;
-        --accent-soft: #1d2740;
+        --accent: #4589ff;
+        --accent-hover: #78a9ff;
+        --accent-text: #08152b;
+        --accent-soft: #16233d;
 
-        --high: #5fd38a;
-        --high-soft: #14301f;
-        --moderate: #e0b04a;
-        --moderate-soft: #332714;
-        --low: #9a9aa6;
-        --low-soft: #26262d;
-        --danger: #f08a8a;
-        --danger-soft: #35191a;
+        --high: #42be65;
+        --high-soft: #16281d;
+        --moderate: #e8b339;
+        --moderate-soft: #302408;
+        --low: #a8a8a8;
+        --low-soft: #333333;
+        --danger: #fa4d56;
+        --danger-soft: #33191b;
     }
 }
 
@@ -85,14 +107,15 @@ h4 {
     color: var(--text);
     line-height: 1.25;
     font-weight: 600;
+    letter-spacing: -0.006em;
 }
 
 h1 {
-    font-size: 1.4rem;
+    font-size: 1.43rem;
 }
 
 h2 {
-    font-size: 1.15rem;
+    font-size: 1.14rem;
 }
 
 h3 {
@@ -106,9 +129,11 @@ p {
 a {
     color: var(--accent);
     text-decoration: none;
+    transition: color var(--duration-fast) var(--ease);
 }
 
 a:hover {
+    color: var(--accent-hover);
     text-decoration: underline;
 }
 
@@ -129,7 +154,9 @@ textarea {
     color: inherit;
 }
 
+/* Carbon's signature focus treatment: a solid 2px accent outline sitting
+   tight against the element, no soft glow. */
 :focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: 1px;
 }

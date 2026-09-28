@@ -4,26 +4,26 @@
    console stays consistent no matter who is signing in or when. */
 
 .login-page {
-    --lg-bg: #0b0d0f;
-    --lg-grid-line: rgba(217, 142, 43, 0.07);
-    --lg-surface: #14181a;
-    --lg-tab: #1a1f21;
-    --lg-line: #2a3134;
-    --lg-line-strong: #3a4448;
-    --lg-text: #ece8e0;
-    --lg-text-muted: #97a0a2;
-    --lg-text-faint: #616a6c;
-    --lg-amber: #dd9b3d;
-    --lg-amber-dim: #9c6d28;
-    --lg-danger: #d1654a;
-    --lg-danger-soft: rgba(209, 101, 74, 0.14);
+    --lg-bg: #0d0e0e;
+    --lg-grid-line: rgba(219, 155, 61, 0.06);
+    --lg-surface: #161616;
+    --lg-tab: #1c1c1c;
+    --lg-line: #303030;
+    --lg-line-strong: #424242;
+    --lg-text: #f4f4f4;
+    --lg-text-muted: #a8a8a8;
+    --lg-text-faint: #6f6f6f;
+    --lg-amber: #e3a13d;
+    --lg-amber-dim: #8f6425;
+    --lg-danger: #fa4d56;
+    --lg-danger-soft: rgba(250, 77, 86, 0.12);
 
     min-height: 100vh;
     display: grid;
     place-items: center;
     padding: 24px;
     background:
-        radial-gradient(ellipse at 50% 20%, rgba(221, 155, 61, 0.08), transparent 55%),
+        radial-gradient(ellipse at 50% 20%, rgba(227, 161, 61, 0.07), transparent 55%),
         radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.6), transparent 60%),
         repeating-linear-gradient(0deg, var(--lg-grid-line) 0 1px, transparent 1px 88px),
         repeating-linear-gradient(90deg, var(--lg-grid-line) 0 1px, transparent 1px 88px),
@@ -35,11 +35,11 @@
     width: 100%;
     max-width: 408px;
     border: 1px solid var(--lg-line);
-    border-radius: 3px;
+    border-radius: 2px;
     background: var(--lg-surface);
-    box-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.8);
     overflow: hidden;
-    animation: login-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: login-rise 0.5s var(--ease) both;
 }
 
 .login-tab {
@@ -281,14 +281,17 @@
 
 /* -------------------------------------------------------------- Sidebar */
 
+/* The side rail is the dark, fixed-charcoal half of the Carbon UI shell —
+   it stays this colour in both light and dark content mode, matching the
+   top bar below. */
 .sidebar {
-    width: 248px;
+    width: 256px;
     flex-shrink: 0;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
+    background: var(--shell-bg);
+    border-right: 1px solid var(--shell-border);
     display: flex;
     flex-direction: column;
-    padding: 18px 14px;
+    padding: 0 0 14px;
     position: sticky;
     top: 0;
     height: 100vh;
@@ -296,9 +299,21 @@
 }
 
 .sidebar-incident {
-    padding: 6px 10px 16px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 12px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--shell-border);
+    margin-bottom: 8px;
+}
+
+.sidebar-incident .faint {
+    color: var(--shell-text-faint);
+}
+
+.sidebar-incident .faint a {
+    color: var(--shell-text-muted);
+}
+
+.sidebar-incident .mono.faint {
+    color: var(--shell-text-faint);
 }
 
 .sidebar-incident-name {
@@ -306,49 +321,57 @@
     font-size: 0.95rem;
     margin-top: 4px;
     line-height: 1.3;
+    color: var(--shell-text);
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
+    padding: 4px 8px;
 }
 
 .sidebar-nav-link {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 9px 10px;
-    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    border-left: 3px solid transparent;
     font-size: 0.875rem;
-    color: var(--text-muted);
+    color: var(--shell-text-muted);
+    transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
 }
 
 .sidebar-nav-link svg {
     flex-shrink: 0;
-    color: var(--text-faint);
+    color: var(--shell-text-faint);
 }
 
 .sidebar-nav-link:hover {
-    background: var(--surface-2);
-    color: var(--text);
+    background: var(--shell-bg-hover);
+    color: var(--shell-text);
     text-decoration: none;
 }
 
+.sidebar-nav-link:hover svg {
+    color: var(--shell-text-muted);
+}
+
 .sidebar-nav-link.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--shell-bg-active);
+    border-left-color: var(--shell-accent);
+    color: var(--shell-text);
     font-weight: 500;
 }
 
 .sidebar-nav-link.active svg {
-    color: var(--accent);
+    color: var(--shell-accent);
 }
 
 .sidebar-stats {
     margin-top: auto;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
+    padding: 14px 20px 4px;
+    border-top: 1px solid var(--shell-border);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -358,14 +381,13 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 0 10px;
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--shell-text-muted);
 }
 
 .sidebar-stat strong {
     font-size: 0.95rem;
-    color: var(--text);
+    color: var(--shell-text);
     font-variant-numeric: tabular-nums;
 }
 
@@ -382,23 +404,35 @@
         flex-wrap: wrap;
         align-items: center;
         gap: 4px 10px;
+        padding: 8px 6px;
     }
 
     .sidebar-incident {
         width: 100%;
         border-bottom: none;
-        padding-bottom: 6px;
+        padding: 4px 10px 6px;
         margin-bottom: 0;
     }
 
     .sidebar-nav {
         flex-direction: row;
         flex-wrap: wrap;
+        padding: 0;
+    }
+
+    .sidebar-nav-link {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .sidebar-nav-link.active {
+        border-left-color: transparent;
+        border-bottom-color: var(--shell-accent);
     }
 
     .sidebar-stats {
         margin-top: 0;
-        padding-top: 0;
+        padding: 0 10px;
         border-top: none;
         flex-direction: row;
         gap: 16px;
@@ -412,14 +446,18 @@
     }
 }
 
+/* The top bar is the other dark half of the UI shell — fixed charcoal,
+   independent of light/dark content mode, with a thin accent seam at the
+   bottom edge that reads as the shell's "productive" signature. */
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 48px;
+    background: var(--shell-bg);
+    border-bottom: 1px solid var(--shell-border);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -431,22 +469,40 @@
     gap: 10px;
 }
 
+.topbar-brand a {
+    text-decoration: none;
+}
+
 .topbar-brand strong {
-    font-size: 1rem;
-    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--shell-text);
+    letter-spacing: -0.006em;
 }
 
 .topbar-brand span {
-    font-size: 0.8rem;
-    color: var(--text-faint);
+    font-size: 0.78rem;
+    color: var(--shell-text-faint);
 }
 
 .topbar-user {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 0.875rem;
-    color: var(--text-muted);
+    font-size: 0.85rem;
+    color: var(--shell-text-muted);
+}
+
+.topbar .btn {
+    background: transparent;
+    border-color: var(--shell-border);
+    color: var(--shell-text-muted);
+}
+
+.topbar .btn:hover:not(:disabled) {
+    background: var(--shell-bg-hover);
+    border-color: var(--border-strong);
+    color: var(--shell-text);
 }
 
 .page {
@@ -489,22 +545,24 @@
 }
 
 .tabs a {
-    padding: 9px 14px;
+    padding: 10px 16px;
     font-size: 0.875rem;
     color: var(--text-muted);
     border-bottom: 2px solid transparent;
     white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
 }
 
 .tabs a:hover {
     color: var(--text);
+    background: var(--surface-2);
     text-decoration: none;
 }
 
 .tabs a.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* --------------------------------------------------------------- Bits */
@@ -512,18 +570,20 @@
 .btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
+    gap: 8px;
+    padding: 8px 15px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-strong);
     background: var(--surface);
     color: var(--text);
     font-size: 0.875rem;
     font-weight: 500;
+    transition: background var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
 }
 
 .btn:hover:not(:disabled) {
     background: var(--surface-2);
+    border-color: var(--text-faint);
 }
 
 .btn-primary {
@@ -533,8 +593,8 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-    background: var(--accent);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .btn-danger {
@@ -545,6 +605,7 @@
 
 .btn-danger:hover:not(:disabled) {
     background: var(--danger-soft);
+    border-color: var(--danger);
 }
 
 .btn-sm {

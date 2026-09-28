@@ -234,6 +234,43 @@ export interface BodyDetail {
     run: MatchRun | null;
 }
 
+/**
+ * One of Gemini's top-3, refining the body's existing rules-based shortlist
+ * with photo evidence the deterministic scorer never sees. Advisory only —
+ * score/coverage/recommended_route are carried over unchanged from the
+ * rules-based candidate for the same pairing; only confidence_band,
+ * ai_rationale and ai_visual_notes come from Gemini itself.
+ */
+export interface GeminiEvidenceSummaryRow {
+    category: string;
+    verdict: Verdict;
+    rationale: string;
+}
+
+export interface GeminiMatchCandidate {
+    am_id: string;
+    rank: number;
+    score: number;
+    confidence_band: ConfidenceBand;
+    coverage: number;
+    recommended_route: ConfirmationRoute | null;
+    ai_rationale: string | null;
+    ai_visual_notes: string | null;
+    profile: AmFile | null;
+    /** The deterministic scorer's own matched evidence for this pairing, compacted for a quick read. */
+    evidence_summary: GeminiEvidenceSummaryRow[];
+}
+
+export interface GeminiMatchResult {
+    success: boolean;
+    ai_available: boolean;
+    run_id: string | null;
+    /** A short plain-language synthesis across all returned candidates. */
+    summary: string | null;
+    candidates: GeminiMatchCandidate[];
+    reason: string | null;
+}
+
 export type SectionOutcome =
     | "referred_for_confirmation"
     | "awaiting_review"

@@ -7,12 +7,14 @@ use App\Models\AmFile;
 use App\Models\Candidate;
 use App\Models\Incident;
 use App\Models\MatchEvidence;
+use App\Models\MatchRun;
 use App\Models\ObservationNorm;
 use App\Models\PhotoEvidence;
 use App\Models\PmCase;
 use App\Models\ReviewDecision;
 use App\Services\Extraction\FormScanCoordinator;
 use App\Services\Intake\PmCaseIntake;
+use App\Services\Matching\GeminiMatcher;
 use App\Support\StagedUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -306,6 +308,119 @@ class BodyController extends Controller
                 ->orderByDesc('decided_at')->orderByDesc('id')->get(),
             'run' => $run,
         ]);
+    }
+
+    /**
+     * Runs Gemini's multimodal refinement of this body's existing
+     * rules-based shortlist and persists the result as a new gemini-v1 run.
+     * Never runs the deterministic matcher itself, and never affects which
+     * run Incident::latestRun() returns.
+     */
+    public function geminiMatch(Incident $incident, string $pmId, GeminiMatcher $matcher)
+    {
+        $body = PmCase::where('incident_id', $incident->incident_id)->findOrFail($pmId);
+
+        $result = $matcher->match($incident, $body);
+
+        if (! $result['run_id']) {
+            return response()->json([
+                'success' => false,
+                'ai_available' => $result['ai_available'],
+                'run_id' => null,
+                'candidates' => [],
+                'reason' => $result['reason'],
+                'message' => $result['reason'],
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'ai_available' => true,
+            'run_id' => $result['run_id'],
+            'summary' => $result['summary'],
+            'candidates' => $this->decorateGeminiCandidates($result['candidates'], $body->pm_id),
+            'reason' => null,
+        ]);
+    }
+
+    /**
+     * The last Gemini refinement already saved for this body, if any —
+     * never calls Gemini itself.
+     */
+    public function latestGeminiMatch(Incident $incident, string $pmId)
+    {
+        $body = PmCase::where('incident_id', $incident->incident_id)->findOrFail($pmId);
+        $run = $incident->latestGeminiRun($body->pm_id);
+
+        if (! $run) {
+            return response()->json(['success' => true, 'ai_available' => true, 'run_id' => null, 'summary' => null, 'candidates' => [], 'reason' => null]);
+        }
+
+        $candidates = Candidate::where('run_id', $run->run_id)
+            ->where('pm_id', $body->pm_id)
+            ->orderBy('rank')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'ai_available' => true,
+            'run_id' => $run->run_id,
+            'summary' => $run->stats['summary'] ?? null,
+            'candidates' => $this->decorateGeminiCandidates($candidates, $body->pm_id),
+            'reason' => null,
+        ]);
+    }
+
+    /**
+     * Attaches each candidate's profile and a compact summary of the
+     * deterministic scorer's own evidence for that pairing — the "matched
+     * evidence" a reviewer needs beside Gemini's rationale, without pulling
+     * in the full per-category breakdown the Candidates tab already shows.
+     *
+     * @param  \Illuminate\Support\Collection<int, Candidate>  $candidates
+     * @return list<array<string, mixed>>
+     */
+    protected function decorateGeminiCandidates($candidates, string $pmId): array
+    {
+        $candidates = collect($candidates);
+        $amIds = $candidates->pluck('am_id');
+
+        $profiles = AmFile::whereIn('am_id', $amIds)->get()->keyBy('am_id');
+
+        // Evidence lives on the deterministic run each gemini-v1 run was
+        // refined from (candidate.run_id here is the gemini run itself,
+        // which never gets its own match_evidence rows — see GeminiMatcher).
+        $sourceRunIds = $candidates->pluck('run_id')->unique()
+            ->map(fn ($runId) => MatchRun::find($runId)?->config['source_run_id'] ?? null)
+            ->filter()
+            ->unique();
+
+        $evidenceByAm = MatchEvidence::whereIn('run_id', $sourceRunIds)
+            ->where('pm_id', $pmId)
+            ->whereIn('am_id', $amIds)
+            ->orderByRaw('abs(llr) desc')
+            ->get()
+            ->groupBy('am_id');
+
+        return $candidates->map(fn (Candidate $c) => [
+            'am_id' => $c->am_id,
+            'rank' => $c->rank,
+            'score' => $c->score,
+            'confidence_band' => $c->confidence_band,
+            'coverage' => $c->coverage,
+            'recommended_route' => $c->recommended_route,
+            'ai_rationale' => $c->ai_rationale,
+            'ai_visual_notes' => $c->ai_visual_notes,
+            'profile' => $profiles->get($c->am_id),
+            'evidence_summary' => ($evidenceByAm[$c->am_id] ?? collect())
+                ->filter(fn (MatchEvidence $e) => $e->isInformative())
+                ->map(fn (MatchEvidence $e) => [
+                    'category' => $e->category,
+                    'verdict' => $e->verdict,
+                    'rationale' => $e->rationale,
+                ])
+                ->values(),
+        ])->values()->all();
     }
 
     /**

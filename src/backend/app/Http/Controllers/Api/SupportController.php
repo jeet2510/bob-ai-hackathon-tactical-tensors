@@ -8,6 +8,7 @@ use App\Models\Candidate;
 use App\Models\Incident;
 use App\Models\ObservationNorm;
 use App\Models\PhotoEvidence;
+use App\Services\Matching\PhotoFileResolver;
 use App\Services\Reporting\ReconciliationReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -169,29 +170,14 @@ class SupportController extends Controller
      * an access-control rule that only exists in the interface is not an
      * access-control rule.
      */
-    public function photo(PhotoEvidence $photo)
+    public function photo(PhotoEvidence $photo, PhotoFileResolver $resolver)
     {
         abort_unless($photo->isMatchable(), 403, 'This photograph is display-restricted and is never served or matched.');
 
-        $relative = ltrim((string) $photo->file_path, '/');
+        $resolved = $resolver->resolve($photo);
 
-        // file_path is recorded relative to one of two roots: the seeded
-        // dataset ("images/pm/...") for ingested demo data, or the app's own
-        // private storage ("incidents/.../photos/...") for anything uploaded
-        // through the Incident Pipeline intake form. Try the new-uploads root
-        // first since it's the cheaper check.
-        $roots = [storage_path('app/private'), rtrim((string) config('dvi.data_path'), '/')];
+        abort_unless($resolved, 404);
 
-        foreach ($roots as $root) {
-            $path = realpath($root.'/'.$relative);
-
-            // Defence in depth: never serve anything outside either root,
-            // whatever a path column happens to contain.
-            if ($path !== false && str_starts_with($path, (string) realpath($root)) && is_file($path)) {
-                return response()->file($path, ['Cache-Control' => 'private, max-age=3600']);
-            }
-        }
-
-        abort(404);
+        return response()->file($resolved['path'], ['Cache-Control' => 'private, max-age=3600']);
     }
 }

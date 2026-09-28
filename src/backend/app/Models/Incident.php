@@ -39,10 +39,32 @@ class Incident extends Model
 
     /**
      * The run whose candidates the dashboard should show.
+     *
+     * Scoped to the deterministic pipeline specifically (scorer_version
+     * 'matcher-v1...') so that a Gemini refinement run — which only ever
+     * covers one body and was never passed through GlobalAssignment — can
+     * never silently become "the" run for triage, assignment, decisions or
+     * the reconciliation report just by being the most recent row.
      */
     public function latestRun(): ?MatchRun
     {
-        return $this->matchRuns()->latest('created_at')->first();
+        return $this->matchRuns()
+            ->where('scorer_version', 'like', 'matcher-v1%')
+            ->latest('created_at')
+            ->first();
+    }
+
+    /**
+     * The most recent Gemini multimodal refinement for one body, if any has
+     * been run. Kept entirely separate from latestRun() — see above.
+     */
+    public function latestGeminiRun(string $pmId): ?MatchRun
+    {
+        return $this->matchRuns()
+            ->where('scorer_version', 'gemini-v1')
+            ->whereHas('candidates', fn ($q) => $q->where('pm_id', $pmId))
+            ->latest('created_at')
+            ->first();
     }
 
     /**

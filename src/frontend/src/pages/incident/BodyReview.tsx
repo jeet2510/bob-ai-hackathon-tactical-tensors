@@ -2,14 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../api/client";
 import { toApiError } from "../../api/errors";
+import { fetchGeminiMatch, runGeminiMatch } from "../../api/matching";
 import EvidenceTable from "../../components/EvidenceTable";
 import ObservationPanel from "../../components/ObservationPanel";
 import PhotoStrip from "../../components/PhotoStrip";
 import { useIncident } from "../IncidentLayout";
 import { BAND_CLASS, BAND_LABEL, DECISION_LABEL, signed } from "../../lib/format";
-import type { BodyDetail, CandidateDetail, DecisionKind } from "../../types";
+import type { BodyDetail, CandidateDetail, DecisionKind, GeminiMatchCandidate } from "../../types";
 
-type Tab = "candidates" | "observations" | "photos" | "history";
+type Tab = "candidates" | "ai" | "observations" | "photos" | "history";
 
 export default function BodyReview() {
     const { incident } = useIncident();
@@ -19,6 +20,7 @@ export default function BodyReview() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [tab, setTab] = useState<Tab>("candidates");
+    const [preferred, setPreferred] = useState<{ am_id: string; reported_name: string | null } | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -90,6 +92,9 @@ export default function BodyReview() {
                 <button className={tab === "candidates" ? "active" : ""} onClick={() => setTab("candidates")}>
                     Candidates ({candidates.length})
                 </button>
+                <button className={tab === "ai" ? "active" : ""} onClick={() => setTab("ai")}>
+                    AI Match
+                </button>
                 <button className={tab === "observations" ? "active" : ""} onClick={() => setTab("observations")}>
                     Source evidence ({observations.length})
                 </button>
@@ -116,6 +121,16 @@ export default function BodyReview() {
                         <CandidateCard key={candidate.am_id} candidate={candidate} />
                     ))
                 )
+            )}
+
+            {tab === "ai" && (
+                <GeminiMatchPanel
+                    incidentId={incident.incident_id}
+                    pmId={body.pm_id}
+                    onUseCandidate={(candidate) =>
+                        setPreferred({ am_id: candidate.am_id, reported_name: candidate.profile?.reported_name ?? null })
+                    }
+                />
             )}
 
             {tab === "observations" && (
@@ -163,6 +178,7 @@ export default function BodyReview() {
                 incidentId={incident.incident_id}
                 pmId={body.pm_id}
                 candidates={candidates}
+                preferred={preferred}
                 onDecided={load}
             />
         </>
@@ -238,15 +254,176 @@ function CandidateCard({ candidate }: { candidate: CandidateDetail }) {
     );
 }
 
+/**
+ * Gemini's multimodal re-ranking of this body's existing rules-based
+ * shortlist, on its own tab. Purely advisory and additive — it never
+ * replaces the Candidates tab, and "Use this candidate" only pre-selects
+ * the reviewer's own decision below; it never records one itself.
+ */
+function GeminiMatchPanel({
+    incidentId,
+    pmId,
+    onUseCandidate,
+}: {
+    incidentId: string;
+    pmId: string;
+    onUseCandidate: (candidate: GeminiMatchCandidate) => void;
+}) {
+    const [candidates, setCandidates] = useState<GeminiMatchCandidate[] | null>(null);
+    const [summary, setSummary] = useState<string | null>(null);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState("");
+    const [notice, setNotice] = useState("");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchGeminiMatch(incidentId, pmId)
+            .then(({ data }) => {
+                if (!cancelled && data.run_id) {
+                    setCandidates(data.candidates);
+                    setSummary(data.summary);
+                }
+            })
+            .catch(() => {
+                // No prior AI run is not an error — the panel just starts idle.
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [incidentId, pmId]);
+
+    async function run() {
+        setBusy(true);
+        setError("");
+        setNotice("");
+
+        try {
+            const { data } = await runGeminiMatch(incidentId, pmId);
+            setCandidates(data.candidates);
+            setSummary(data.summary);
+
+            if (data.candidates.length === 0) {
+                setNotice(data.reason ?? "Gemini found no credible visual match in the shortlist.");
+            }
+        } catch (caught) {
+            const apiError = toApiError(caught, "Could not run the AI match.");
+
+            if ((caught as { response?: { status?: number } })?.response?.status === 422) {
+                setNotice(apiError.message);
+            } else {
+                setError(apiError.message);
+            }
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    return (
+        <>
+            <div className="page-head" style={{ marginBottom: 14 }}>
+                <p className="muted">
+                    Re-ranks the shortlist using photographs and visual evidence the rules-based
+                    scorer cannot read. Advisory only — never a confirmation.
+                </p>
+
+                <button className="btn btn-primary" onClick={run} disabled={busy}>
+                    {busy ? "Matching…" : candidates ? "Run again" : "Run AI match"}
+                </button>
+            </div>
+
+            {error && <div className="error-banner">{error}</div>}
+            {notice && <div className="notice">{notice}</div>}
+
+            {candidates === null && !busy && !notice && !error && (
+                <div className="empty">Not run yet for this body.</div>
+            )}
+
+            {summary && (
+                <div className="card" style={{ marginBottom: 14 }}>
+                    <div className="rationale-heading">AI summary</div>
+                    <p style={{ marginTop: 6 }}>{summary}</p>
+                </div>
+            )}
+
+            {candidates && candidates.length > 0 && (
+                <div className="repeatable-table">
+                    {candidates.map((candidate) => (
+                        <article key={candidate.am_id} className={`candidate band-${BAND_CLASS[candidate.confidence_band]}`}>
+                            <header className="candidate-head">
+                                <div>
+                                    <div className="candidate-rank">AI candidate {candidate.rank}</div>
+                                    <div className="candidate-name">
+                                        {candidate.profile?.reported_name ?? candidate.am_id}
+                                    </div>
+                                    <div className="muted">
+                                        <span className="mono">{candidate.am_id}</span>
+                                        {candidate.profile?.sex && ` · ${candidate.profile.sex}`}
+                                        {candidate.profile?.age != null && ` · ${candidate.profile.age} yrs`}
+                                    </div>
+                                </div>
+
+                                <span className={`badge badge-${BAND_CLASS[candidate.confidence_band]}`}>
+                                    {BAND_LABEL[candidate.confidence_band]}
+                                </span>
+                            </header>
+
+                            <div className="candidate-body">
+                                {candidate.evidence_summary.length > 0 && (
+                                    <>
+                                        <div className="rationale-heading">Matched evidence</div>
+                                        <ul className="rationale-list">
+                                            {candidate.evidence_summary.map((row, i) => (
+                                                <li key={i} className={row.verdict === "conflict" ? "conflict-line" : undefined}>
+                                                    <strong>{row.category}</strong> — {row.verdict}
+                                                    {row.rationale && `: ${row.rationale}`}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+
+                                {(candidate.ai_rationale || candidate.ai_visual_notes) && (
+                                    <>
+                                        <div className="rationale-heading" style={{ marginTop: 12 }}>
+                                            Gemini notes
+                                        </div>
+                                        <p className="muted">
+                                            {[candidate.ai_rationale, candidate.ai_visual_notes].filter(Boolean).join(" ")}
+                                        </p>
+                                    </>
+                                )}
+
+                                <div className="btn-row" style={{ marginTop: 14 }}>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm"
+                                        onClick={() => onUseCandidate(candidate)}
+                                    >
+                                        Use this candidate below
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )}
+        </>
+    );
+}
+
 function DecisionForm({
     incidentId,
     pmId,
     candidates,
+    preferred,
     onDecided,
 }: {
     incidentId: string;
     pmId: string;
     candidates: CandidateDetail[];
+    preferred: { am_id: string; reported_name: string | null } | null;
     onDecided: () => void;
 }) {
     const [decision, setDecision] = useState<DecisionKind>("recommend_confirm_test");
@@ -258,6 +435,21 @@ function DecisionForm({
     const [message, setMessage] = useState("");
 
     const needsPairing = decision !== "no_credible_candidate";
+
+    // An AI-suggested candidate the reviewer chose to act on. It pre-selects
+    // this form's candidate — it never submits a decision on its own.
+    useEffect(() => {
+        if (preferred) {
+            setDecision("recommend_confirm_test");
+            setAmId(preferred.am_id);
+        }
+    }, [preferred]);
+
+    // A Gemini suggestion may point at a shortlist candidate outside the
+    // top-3 shown above, so the option list must never lose it.
+    const options = candidates.some((c) => c.am_id === preferred?.am_id) || !preferred
+        ? candidates
+        : [...candidates, { am_id: preferred.am_id, profile: { reported_name: preferred.reported_name } } as CandidateDetail];
 
     async function submit(event: React.FormEvent) {
         event.preventDefault();
@@ -314,7 +506,7 @@ function DecisionForm({
                         <label htmlFor="am_id">Candidate</label>
                         <select id="am_id" value={amId} onChange={(e) => setAmId(e.target.value)}>
                             <option value="">Select…</option>
-                            {candidates.map((c) => (
+                            {options.map((c) => (
                                 <option key={c.am_id} value={c.am_id}>
                                     {c.profile?.reported_name ?? c.am_id} ({c.am_id})
                                 </option>

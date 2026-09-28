@@ -61,6 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bodies/scan-pdf', [BodyController::class, 'scanPdf']);
         Route::post('/bodies/scan-photo', [BodyController::class, 'scanPhoto']);
 
+        // AI-assisted match refinement: Gemini re-ranks a body's existing
+        // rules-based shortlist using photographs neither side's text
+        // description alone captures. Advisory only — see GeminiMatcher.
+        Route::post('/bodies/{pmId}/gemini-match', [BodyController::class, 'geminiMatch']);
+        Route::get('/bodies/{pmId}/gemini-match', [BodyController::class, 'latestGeminiMatch']);
+
         Route::post('/uploads', [UploadController::class, 'store']);
 
         /*

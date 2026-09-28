@@ -27,6 +27,9 @@ export default function Incidents() {
                         candidates. Records never cross between incidents.
                     </p>
                 </div>
+                <Link className="btn btn-primary" to="/incidents/new">
+                    + New incident
+                </Link>
             </div>
 
             {error && <div className="error-banner">{error}</div>}

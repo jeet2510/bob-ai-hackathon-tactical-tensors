@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json([
@@ -21,17 +22,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/incidents', [IncidentController::class, 'index']);
+    Route::post('/incidents', [IncidentController::class, 'store']);
     Route::get('/incidents/{incident}', [IncidentController::class, 'show']);
 
     Route::prefix('incidents/{incident}')->group(function () {
 
         /*
         |------------------------------------------------------------------
-        | Post-mortem: the triage board and the body review screen
+        | Post-mortem: the triage board, the body review screen, and the
+        | Incident Pipeline intake form (manual entry and both AI-assist
+        | scan endpoints funnel into the same POST /bodies).
         |------------------------------------------------------------------
         */
         Route::get('/bodies', [BodyController::class, 'index']);
+        Route::post('/bodies', [BodyController::class, 'store']);
         Route::get('/bodies/{pmId}', [BodyController::class, 'show']);
+        Route::post('/bodies/scan-pdf', [BodyController::class, 'scanPdf']);
+        Route::post('/bodies/scan-photo', [BodyController::class, 'scanPhoto']);
+
+        Route::post('/uploads', [UploadController::class, 'store']);
 
         /*
         |------------------------------------------------------------------

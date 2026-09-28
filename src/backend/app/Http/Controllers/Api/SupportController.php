@@ -173,15 +173,25 @@ class SupportController extends Controller
     {
         abort_unless($photo->isMatchable(), 403, 'This photograph is display-restricted and is never served or matched.');
 
-        // file_path is recorded relative to the dataset root ("images/pm/...").
-        $root = rtrim((string) config('dvi.data_path'), '/');
-        $path = realpath($root.'/'.ltrim((string) $photo->file_path, '/'));
+        $relative = ltrim((string) $photo->file_path, '/');
 
-        // Defence in depth: never serve anything outside the dataset, whatever
-        // a path column happens to contain.
-        abort_unless($path !== false && str_starts_with($path, (string) realpath($root)), 404);
-        abort_unless(is_file($path), 404);
+        // file_path is recorded relative to one of two roots: the seeded
+        // dataset ("images/pm/...") for ingested demo data, or the app's own
+        // private storage ("incidents/.../photos/...") for anything uploaded
+        // through the Incident Pipeline intake form. Try the new-uploads root
+        // first since it's the cheaper check.
+        $roots = [storage_path('app/private'), rtrim((string) config('dvi.data_path'), '/')];
 
-        return response()->file($path, ['Cache-Control' => 'private, max-age=3600']);
+        foreach ($roots as $root) {
+            $path = realpath($root.'/'.$relative);
+
+            // Defence in depth: never serve anything outside either root,
+            // whatever a path column happens to contain.
+            if ($path !== false && str_starts_with($path, (string) realpath($root)) && is_file($path)) {
+                return response()->file($path, ['Cache-Control' => 'private, max-age=3600']);
+            }
+        }
+
+        abort(404);
     }
 }

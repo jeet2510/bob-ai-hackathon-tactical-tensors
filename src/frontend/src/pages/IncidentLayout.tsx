@@ -108,6 +108,9 @@ export default function IncidentLayout() {
                 <NavLink to={base} end className="sidebar-nav-link">
                     <IconGrid /> Dashboard
                 </NavLink>
+                <NavLink to={`${base}/bodies/new`} className="sidebar-nav-link">
+                    <IconClipboard /> + Log a recovered body
+                </NavLink>
                 <NavLink to={`${base}/profiles`} className="sidebar-nav-link">
                     <IconUsers /> Family reports
                 </NavLink>

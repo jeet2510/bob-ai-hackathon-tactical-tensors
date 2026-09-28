@@ -11,10 +11,185 @@ use App\Models\ObservationNorm;
 use App\Models\PhotoEvidence;
 use App\Models\PmCase;
 use App\Models\ReviewDecision;
+use App\Services\Extraction\FormScanCoordinator;
+use App\Services\Intake\PmCaseIntake;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BodyController extends Controller
 {
+    /**
+     * Creates a recovered-body record from the post-mortem intake form.
+     *
+     * The single write path for the Incident Pipeline: manual entry and both
+     * AI-assist panels (scan-pdf, scan-photo) only ever populate the client's
+     * form state before this is called — nothing is persisted until a human
+     * reviews and submits it.
+     */
+    public function store(Request $request, Incident $incident)
+    {
+        $data = $request->validate([
+            'pm_id' => ['nullable', 'string', 'max:40'],
+            'examiner_name' => ['required', 'string', 'max:255'],
+            'examiner_role' => ['required', 'string', 'max:255'],
+            'found_at' => ['required', 'date'],
+            'found_place' => ['nullable', 'string', 'max:255'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lon' => ['nullable', 'numeric', 'between:-180,180'],
+            'body_condition' => ['required', Rule::in(['Fresh', 'Slight decomp.', 'Moderate decomp.', 'Advanced decomp.', 'Burnt'])],
+            'sex' => ['required', Rule::in(['M', 'F'])],
+            'age_min' => ['required', 'integer', 'min:0', 'max:120'],
+            'age_max' => ['required', 'integer', 'min:0', 'max:120', 'gte:age_min'],
+            'height_cm' => ['nullable', 'integer', 'min:30', 'max:250'],
+            'build' => ['nullable', 'string', 'max:20'],
+            'skin_tone' => ['nullable', 'string', 'max:20'],
+            'skin_tone_other' => ['nullable', 'string', 'max:100'],
+            'hair_colour' => ['nullable', 'string', 'max:20'],
+            'hair_length' => ['nullable', 'string', 'max:20'],
+            'eye_colour' => ['nullable', 'string', 'max:20'],
+            'facial_hair' => ['nullable', 'string', 'max:30'],
+            'dna_status' => ['required', Rule::in(['sample_taken', 'degraded', 'not_collected'])],
+            'dental_status' => ['required', Rule::in(['chart_completed', 'not_examined', 'unsuitable'])],
+            'print_status' => ['required', Rule::in(['usable', 'unusable', 'not_taken'])],
+
+            'dental_chart' => ['nullable', 'array'],
+            'dental_chart.*.tooth' => ['required_with:dental_chart', 'integer', 'min:11', 'max:48'],
+            'dental_chart.*.code' => ['required_with:dental_chart', Rule::in(['M', 'F', 'C', 'R'])],
+
+            'distinguishing_features' => ['nullable', 'array', 'max:6'],
+            'distinguishing_features.*.type' => ['required_with:distinguishing_features', 'string',
+                Rule::in(['tattoo', 'mark', 'scar', 'mole', 'birthmark', 'burn', 'deformity', 'amputation', 'piercing', 'implant', 'other'])],
+            'distinguishing_features.*.description' => ['nullable', 'string', 'max:500'],
+            'distinguishing_features.*.region' => ['nullable', 'string', 'max:40'],
+            'distinguishing_features.*.side' => ['nullable', Rule::in(['L', 'R', 'C'])],
+            'distinguishing_features.*.serial_no' => ['nullable', 'string', 'max:120'],
+            'distinguishing_features.*.photo_ref' => ['nullable', 'string', 'max:20'],
+
+            'clothing' => ['nullable', 'array', 'max:5'],
+            'clothing.*.slot' => ['required_with:clothing', Rule::in(['Headwear', 'Upper body', 'Lower body', 'Footwear', 'Other'])],
+            'clothing.*.garment' => ['nullable', 'string', 'max:60'],
+            'clothing.*.colour' => ['nullable', 'string', 'max:40'],
+
+            'jewellery_effects' => ['nullable', 'array', 'max:3'],
+            'jewellery_effects.*.kind' => ['required_with:jewellery_effects', Rule::in(['jewellery', 'belonging'])],
+            'jewellery_effects.*.item' => ['nullable', 'string', 'max:120'],
+            'jewellery_effects.*.material_description' => ['nullable', 'string', 'max:255'],
+
+            'id_documents' => ['nullable', 'array'],
+            'id_documents.*.document_type' => ['nullable', 'string', 'max:60'],
+            'id_documents.*.id_last4' => ['nullable', 'string', 'max:4'],
+            'id_documents.*.name_on_document' => ['nullable', 'string', 'max:255'],
+            'id_documents.*.note' => ['nullable', 'string', 'max:255'],
+
+            'photo_log' => ['nullable', 'array'],
+            'photo_log.*.label' => ['nullable', 'string', 'max:20'],
+            'photo_log.*.modality' => ['required_with:photo_log', Rule::in(['Body diagram', 'Tattoo/mark', 'Clothing', 'Face (restr.)', 'Other'])],
+            'photo_log.*.view' => ['nullable', 'string', 'max:60'],
+            'photo_log.*.quality_flags' => ['nullable', 'array'],
+            'photo_log.*.quality_flags.*' => ['string', Rule::in(['Blur', 'Low light', 'Noise', 'None'])],
+            'photo_log.*.upload_ref' => ['nullable', 'string', 'max:80'],
+
+            'notes' => ['nullable', 'string', 'max:4000'],
+            'signature_note' => ['nullable', 'string', 'max:255'],
+            'completed_at' => ['nullable', 'date'],
+            'chain_of_custody_hash' => ['nullable', 'string', 'max:120'],
+            'scan_source_ref' => ['nullable', 'string', 'max:80'],
+            'source' => ['required', Rule::in(['manual', 'pdf_scan', 'live_scan', 'mixed'])],
+        ]);
+
+        $stagedFiles = $this->resolveStagedFiles($incident, $data);
+
+        $pm = app(PmCaseIntake::class)->store($incident, $data, $stagedFiles);
+
+        return response()->json(['success' => true, 'pm_id' => $pm->pm_id, 'body' => $pm], 201);
+    }
+
+    /**
+     * Uploads and reads a scanned/photographed copy of the paper form.
+     *
+     * Never persists anything — it stages the original for audit and returns
+     * a form-shaped JSON payload for the client to prefill and review before
+     * the real POST .../bodies call.
+     */
+    public function scanPdf(Request $request, Incident $incident, FormScanCoordinator $coordinator)
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:pdf', 'max:15360']]);
+
+        $file = $request->file('file');
+        $ref = Str::uuid()->toString().'.pdf';
+        $file->storeAs("incidents/{$incident->incident_id}/scans", $ref, 'local');
+
+        $result = $coordinator->scanPdf(base64_encode(file_get_contents($file->getRealPath())));
+
+        return response()->json([
+            'success' => true,
+            'ai_available' => $result['ai_available'],
+            'provider' => $result['provider'],
+            'upload_ref' => $ref,
+            'fields' => $result['fields'],
+            'confidence' => $result['confidence'] ?? null,
+            'reason' => $result['reason'] ?? null,
+        ]);
+    }
+
+    /**
+     * Uploads and reads a live-scan photograph of a recovered body.
+     *
+     * Same never-persists contract as scanPdf — only the visually-derivable
+     * subset of the form is returned.
+     */
+    public function scanPhoto(Request $request, Incident $incident, FormScanCoordinator $coordinator)
+    {
+        $request->validate(['file' => ['required', 'image', 'mimes:jpeg,png,webp,heic', 'max:15360']]);
+
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg';
+        $ref = Str::uuid()->toString().'.'.$extension;
+        $file->storeAs("incidents/{$incident->incident_id}/scans", $ref, 'local');
+
+        $result = $coordinator->scanPhoto(base64_encode(file_get_contents($file->getRealPath())), (string) $file->getMimeType());
+
+        return response()->json([
+            'success' => true,
+            'ai_available' => $result['ai_available'],
+            'provider' => $result['provider'],
+            'upload_ref' => $ref,
+            'fields' => $result['fields'],
+            'confidence' => $result['confidence'] ?? null,
+            'reason' => $result['reason'] ?? null,
+        ]);
+    }
+
+    /**
+     * Maps the upload_ref values referenced anywhere in the submitted form
+     * back to the staged file each one points at, so PmCaseIntake can move
+     * them into their permanent home. Silently ignores a ref that does not
+     * resolve to a real staged file — a missing photo must never block
+     * saving the rest of the form.
+     *
+     * @return array<string, string>
+     */
+    protected function resolveStagedFiles(Incident $incident, array $data): array
+    {
+        $refs = collect($data['photo_log'] ?? [])->pluck('upload_ref')->filter()->unique();
+
+        $root = storage_path("app/private/incidents/{$incident->incident_id}/scans");
+        $resolved = [];
+
+        foreach ($refs as $ref) {
+            // Refs are UUID.ext, generated only by our own upload endpoints —
+            // still resolved through basename() so nothing outside this
+            // incident's scan directory can ever be reached.
+            $path = $root.'/'.basename((string) $ref);
+
+            if (is_file($path)) {
+                $resolved[$ref] = $path;
+            }
+        }
+
+        return $resolved;
+    }
     /**
      * The triage list: every recovered body with its strongest candidate.
      */

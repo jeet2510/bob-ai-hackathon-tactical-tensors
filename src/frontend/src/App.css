@@ -1582,3 +1582,597 @@ details.breakdown > div {
         animation: none;
     }
 }
+
+/* ----------------------------------------------------- Incident Pipeline */
+
+.body-intake {
+    --topbar-h: 57px;
+}
+
+.intake-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.progress-ring {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+}
+
+.progress-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 3;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.25s ease;
+}
+
+.form-section-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    margin: 0 0 16px;
+    padding: 10px 2px;
+    position: sticky;
+    top: var(--topbar-h);
+    background: var(--bg);
+    z-index: 6;
+}
+
+.form-section-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.form-section-nav-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.form-section-nav-pill:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    text-decoration: none;
+}
+
+.scan-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.scan-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-color: var(--border-strong);
+}
+
+.scan-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.body-intake-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.body-intake-form .form-section {
+    scroll-margin-top: calc(var(--topbar-h) + 56px);
+}
+
+.body-intake-form .form-section:target {
+    animation: section-flash 1.4s ease;
+}
+
+@keyframes section-flash {
+    0% { box-shadow: 0 0 0 3px var(--accent-soft); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.section-header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.section-header-text h3 {
+    margin-bottom: 2px;
+}
+
+.section-header-text p {
+    font-size: 0.82rem;
+}
+
+/* ----------------------------------------------------------- Form fields */
+
+.form-group-label-text {
+    display: inline;
+}
+
+.required-mark {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    min-height: 42px;
+}
+
+.select-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888892' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px !important;
+}
+
+.form-grid-narrow {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.form-group-pair .input-pair {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.input-pair input {
+    min-width: 0;
+    flex: 1;
+    text-align: center;
+}
+
+.input-pair span {
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+
+.input-pair .unit {
+    white-space: nowrap;
+}
+
+.input-narrow {
+    max-width: 70px;
+}
+
+/* -------------------------------------------------------------- Upload */
+
+.upload-dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--accent);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.upload-dropzone:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.upload-dropzone-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.upload-dropzone-text strong {
+    font-size: 0.88rem;
+    color: var(--text);
+}
+
+.upload-dropzone-text span {
+    font-size: 0.76rem;
+    color: var(--text-faint);
+}
+
+.upload-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+}
+
+.chip.ai-suggested {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: transparent;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- FDI grid */
+
+.fdi-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fdi-grid-row {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+}
+
+.fdi-tooth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    line-height: 1.1;
+    scroll-snap-align: start;
+    transition: transform 0.1s ease;
+}
+
+.fdi-tooth:active {
+    transform: scale(0.93);
+}
+
+.fdi-tooth-num {
+    font-size: 0.6rem;
+    color: var(--text-faint);
+}
+
+.fdi-tooth-code {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--text);
+}
+
+.fdi-tooth.state-M { background: var(--danger-soft); border-color: var(--danger); }
+.fdi-tooth.state-M .fdi-tooth-code { color: var(--danger); }
+.fdi-tooth.state-F { background: var(--accent-soft); border-color: var(--accent); }
+.fdi-tooth.state-F .fdi-tooth-code { color: var(--accent); }
+.fdi-tooth.state-C { background: var(--moderate-soft); border-color: var(--moderate); }
+.fdi-tooth.state-C .fdi-tooth-code { color: var(--moderate); }
+.fdi-tooth.state-R { background: var(--high-soft); border-color: var(--high); }
+.fdi-tooth.state-R .fdi-tooth-code { color: var(--high); }
+
+/* ------------------------------------------------------ Repeatable tables */
+
+.repeatable-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.repeatable-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+}
+
+.repeatable-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.repeatable-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.repeatable-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.repeatable-table input,
+.repeatable-table select {
+    width: 100%;
+    padding: 8px 10px;
+    min-height: 40px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: 0.85rem;
+}
+
+.repeatable-table select.select-input {
+    background-size: 9px;
+    padding-right: 26px !important;
+}
+
+.row-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.row-slot-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.repeatable-table-actions {
+    width: 1%;
+    text-align: right;
+}
+
+.repeatable-table-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-faint);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.repeatable-table-remove:hover {
+    color: var(--danger);
+    background: var(--danger-soft);
+}
+
+/* --------------------------------------------------------- Radio/checkbox */
+
+.radio-group,
+.checkbox-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.checkbox-group-tight {
+    gap: 6px;
+}
+
+.radio-pill,
+.checkbox-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    min-height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.radio-pill:hover,
+.checkbox-pill:hover {
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+.radio-pill.checked,
+.checkbox-pill.checked {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.radio-pill input,
+.checkbox-pill input {
+    /* Kept in the DOM (not display:none) for a11y/keyboard support, visually
+       collapsed since the pill itself carries the checked state. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ---------------------------------------------------------- Sticky save */
+
+.form-actions-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -6px 16px -12px rgba(0, 0, 0, 0.25);
+}
+
+.form-actions-hint {
+    font-size: 0.8rem;
+}
+
+/* -------------------------------------------------------------- Mobile */
+
+@media (max-width: 640px) {
+    .page {
+        padding: 14px;
+    }
+
+    .form-section {
+        padding: 14px;
+    }
+
+    .scan-panels {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid,
+    .form-grid-narrow {
+        grid-template-columns: 1fr;
+    }
+
+    .intake-progress span {
+        display: none;
+    }
+
+    .page-head {
+        gap: 10px;
+    }
+
+    /* Repeatable tables collapse into stacked cards: each row becomes a
+       block with its own bordered card, each cell prefixed by its column
+       label (from the `data-label` attribute) instead of a shared header
+       row that would otherwise force horizontal scrolling on a phone. */
+    .repeatable-table table,
+    .repeatable-table thead,
+    .repeatable-table tbody,
+    .repeatable-table tr,
+    .repeatable-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .repeatable-table thead {
+        display: none;
+    }
+
+    .repeatable-table tr {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px;
+        margin-bottom: 10px;
+        background: var(--surface);
+    }
+
+    .repeatable-table td {
+        border-bottom: none;
+        padding: 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .repeatable-table td[data-label]:not([data-label=""])::before {
+        content: attr(data-label);
+        flex: 0 0 40%;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-faint);
+    }
+
+    .repeatable-table-actions {
+        justify-content: flex-end;
+        text-align: left;
+        border-top: 1px solid var(--border);
+        margin-top: 4px;
+        padding-top: 8px !important;
+    }
+
+    .form-actions-sticky {
+        margin: 0 -14px -14px;
+        padding: 10px 14px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions-sticky .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

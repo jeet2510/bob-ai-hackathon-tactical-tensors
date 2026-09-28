@@ -10,6 +10,7 @@ use App\Models\Observation;
 use App\Models\PhotoEvidence;
 use App\Models\PmCase;
 use App\Models\ReviewDecision;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class IncidentController extends Controller
@@ -22,6 +23,32 @@ class IncidentController extends Controller
             ->get();
 
         return response()->json(['success' => true, 'incidents' => $incidents]);
+    }
+
+    /**
+     * Opens a new incident. This is the first step of the Incident Pipeline:
+     * bodies can only be logged against an incident that already exists.
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'incident_id' => ['required', 'string', 'max:20', 'regex:/^[A-Z0-9\-]+$/', 'unique:incident,incident_id'],
+            'name' => ['required', 'string', 'max:255'],
+            'incident_date' => ['required', 'date'],
+            'district' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $incident = Incident::create([
+            'incident_id' => $data['incident_id'],
+            'name' => $data['name'],
+            'incident_date' => $data['incident_date'],
+            'district' => $data['district'] ?? null,
+            // Real incidents opened through the app are never part of the
+            // synthetic demo dataset.
+            'synthetic' => false,
+        ]);
+
+        return response()->json(['success' => true, 'incident' => $incident], 201);
     }
 
     public function show(Incident $incident)

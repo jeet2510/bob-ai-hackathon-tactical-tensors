@@ -3,8 +3,10 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { isAuthenticated } from "./auth/auth";
 import Login from "./pages/Login";
 import Incidents from "./pages/Incidents";
+import NewIncident from "./pages/NewIncident";
 import IncidentLayout from "./pages/IncidentLayout";
 import CommandBoard from "./pages/incident/CommandBoard";
+import NewBody from "./pages/incident/NewBody";
 import BodyReview from "./pages/incident/BodyReview";
 import Profiles from "./pages/incident/Profiles";
 import Assignment from "./pages/incident/Assignment";
@@ -38,6 +40,15 @@ export default function App() {
             />
 
             <Route
+                path="/incidents/new"
+                element={
+                    <ProtectedRoute>
+                        <NewIncident />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
                 path="/incidents/:incidentId"
                 element={
                     <ProtectedRoute>
@@ -46,6 +57,7 @@ export default function App() {
                 }
             >
                 <Route index element={<CommandBoard />} />
+                <Route path="bodies/new" element={<NewBody />} />
                 <Route path="bodies/:pmId" element={<BodyReview />} />
                 <Route path="profiles" element={<Profiles />} />
                 <Route path="assignment" element={<Assignment />} />

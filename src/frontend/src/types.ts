@@ -333,3 +333,253 @@ export interface AssignmentRow {
     assigned: { am_id: string; reported_name: string | null; score: number; confidence_band: ConfidenceBand } | null;
     differs: boolean;
 }
+
+/* ------------------------------------------------------- Incident Pipeline */
+/* Option lists mirror BodyController::store()'s validation enums exactly.
+ * Where the paper form offers a choice the INTERPOL codebook has no code
+ * for, `value` is a plain literal (still stored, just not scorable) — see
+ * PmCaseIntake's *_MAP constants for the authoritative mapping. */
+
+export const BODY_CONDITION_OPTIONS = [
+    { value: "Fresh", label: "Fresh" },
+    { value: "Slight decomp.", label: "Slight decomposition" },
+    { value: "Moderate decomp.", label: "Moderate decomposition" },
+    { value: "Advanced decomp.", label: "Advanced decomposition" },
+    { value: "Burnt", label: "Burnt" },
+];
+
+export const PM_SEX_OPTIONS = [
+    { value: "M", label: "Male" },
+    { value: "F", label: "Female" },
+];
+
+export const BUILD_OPTIONS = [
+    { value: "Slim", label: "Slim" },
+    { value: "Medium", label: "Medium" },
+    { value: "Heavy", label: "Heavy" },
+    { value: "Muscular", label: "Muscular" },
+    { value: "Obese", label: "Obese" },
+];
+
+export const SKIN_TONE_OPTIONS = [
+    { value: "Fair", label: "Fair" },
+    { value: "Wheatish", label: "Wheatish" },
+    { value: "Dark", label: "Dark" },
+    { value: "Other", label: "Other" },
+];
+
+export const HAIR_COLOUR_OPTIONS = [
+    { value: "Black", label: "Black" },
+    { value: "Brown", label: "Brown" },
+    { value: "Grey", label: "Grey" },
+    { value: "White", label: "White" },
+    { value: "Dyed", label: "Dyed" },
+];
+
+export const HAIR_LENGTH_OPTIONS = [
+    { value: "Bald", label: "Bald" },
+    { value: "Short", label: "Short" },
+    { value: "Medium", label: "Medium" },
+    { value: "Long", label: "Long" },
+];
+
+export const EYE_COLOUR_OPTIONS = [
+    { value: "Black", label: "Black" },
+    { value: "Brown", label: "Brown" },
+    { value: "Hazel", label: "Hazel" },
+    { value: "Grey", label: "Grey" },
+];
+
+export const FACIAL_HAIR_OPTIONS = [
+    { value: "Clean-shaven", label: "Clean-shaven" },
+    { value: "Moustache", label: "Moustache" },
+    { value: "Beard", label: "Beard" },
+    { value: "Stubble", label: "Stubble" },
+    { value: "Not applicable", label: "Not applicable" },
+];
+
+export const DNA_STATUS_OPTIONS = [
+    { value: "sample_taken", label: "Taken" },
+    { value: "degraded", label: "Degraded" },
+    { value: "not_collected", label: "Not collected" },
+];
+
+export const DENTAL_STATUS_OPTIONS = [
+    { value: "chart_completed", label: "Chart completed" },
+    { value: "not_examined", label: "Not examined" },
+    { value: "unsuitable", label: "Unsuitable" },
+];
+
+export const PRINT_STATUS_OPTIONS = [
+    { value: "usable", label: "Usable" },
+    { value: "unusable", label: "Unusable" },
+    { value: "not_taken", label: "Not taken" },
+];
+
+export const FEATURE_TYPE_OPTIONS = [
+    { value: "tattoo", label: "Tattoo" },
+    { value: "mark", label: "Mark" },
+    { value: "scar", label: "Scar" },
+    { value: "mole", label: "Mole" },
+    { value: "birthmark", label: "Birthmark" },
+    { value: "burn", label: "Burn" },
+    { value: "deformity", label: "Deformity" },
+    { value: "amputation", label: "Amputation" },
+    { value: "piercing", label: "Piercing" },
+    { value: "implant", label: "Implant" },
+    { value: "other", label: "Other" },
+];
+
+export const SIDE_OPTIONS = [
+    { value: "L", label: "Left" },
+    { value: "R", label: "Right" },
+    { value: "C", label: "Centre" },
+];
+
+export const CLOTHING_SLOTS = ["Headwear", "Upper body", "Lower body", "Footwear", "Other"];
+
+export const JEWELLERY_KIND_OPTIONS = [
+    { value: "jewellery", label: "Jewellery" },
+    { value: "belonging", label: "Belonging" },
+];
+
+export const PHOTO_MODALITY_OPTIONS = [
+    { value: "Body diagram", label: "Body diagram" },
+    { value: "Tattoo/mark", label: "Tattoo/mark" },
+    { value: "Clothing", label: "Clothing" },
+    { value: "Face (restr.)", label: "Face (restr.)" },
+    { value: "Other", label: "Other" },
+];
+
+export const QUALITY_FLAG_OPTIONS = [
+    { value: "Blur", label: "Blur" },
+    { value: "Low light", label: "Low light" },
+    { value: "Noise", label: "Noise" },
+    { value: "None", label: "None" },
+];
+
+/** Closed vocabularies mirroring backend Lexicon.php — offered as prefill
+ * suggestions (via a datalist) on free-text fields so manually-entered data
+ * lands in the same vocabulary the matching engine reads, without forcing a
+ * rigid dropdown on fields that legitimately need free text too. */
+
+export const REGION_SUGGESTIONS = [
+    "upper arm", "forearm", "shin", "cheek", "forehead", "shoulder", "wrist", "knee",
+    "thigh", "abdomen", "chest", "back", "chin", "neck", "hand", "foot", "trunk and thighs",
+];
+
+export const GARMENT_SUGGESTIONS = [
+    "salwar top", "t-shirt", "blouse", "kurta", "hoodie", "shirt",
+    "track pants", "saree", "salwar", "jeans", "trousers", "leggings", "shorts", "lungi",
+    "rubber boots", "leather shoes", "sports shoes", "chappals", "sandals",
+];
+
+export const CLOTHING_COLOUR_SUGGESTIONS = [
+    "white", "blue", "green", "grey", "brown", "black", "red", "purple", "pink", "yellow", "orange",
+];
+
+export const JEWELLERY_ITEM_SUGGESTIONS = [
+    "mangalsutra", "toe ring", "nose stud", "earrings", "bangles", "kada", "watch", "thread", "chain", "ring",
+];
+
+export const BELONGING_SUGGESTIONS = [
+    "mobile phone", "earphones", "spectacles", "backpack", "handbag", "umbrella", "wallet", "keys",
+];
+
+export const ID_DOCUMENT_TYPE_SUGGESTIONS = ["voter-style", "office", "school", "college"];
+
+/** One examined tooth in the FDI dental chart (Section E). */
+export interface DentalChartEntry {
+    tooth: number;
+    code: "M" | "F" | "C" | "R";
+}
+
+/** Section F: one row of the body-diagram distinguishing-features table. */
+export interface DistinguishingFeatureRow {
+    type: string;
+    description: string;
+    region: string;
+    side: "L" | "R" | "C" | "";
+    serial_no: string;
+    photo_ref: string;
+}
+
+/** Section G: one of the five fixed clothing slots. */
+export interface ClothingRow {
+    slot: string;
+    garment: string;
+    colour: string;
+}
+
+/** Section H: one jewellery or personal-effect row. */
+export interface JewelleryEffectRow {
+    kind: "jewellery" | "belonging";
+    item: string;
+    material_description: string;
+}
+
+/** Section I: one identity document found on or with the body. */
+export interface IdDocumentRow {
+    document_type: string;
+    id_last4: string;
+    name_on_document: string;
+    note: string;
+}
+
+/** Section J: one photo evidence log entry. */
+export interface PhotoLogRow {
+    label: string;
+    modality: string;
+    view: string;
+    quality_flags: string[];
+    upload_ref: string;
+}
+
+/** The whole post-mortem intake form, sections A–K, as local editable state. */
+export interface NewBodyFormState {
+    pm_id: string;
+    examiner_name: string;
+    examiner_role: string;
+    found_at: string;
+    found_place: string;
+    lat: string;
+    lon: string;
+    body_condition: string;
+    sex: string;
+    age_min: string;
+    age_max: string;
+    height_cm: string;
+    build: string;
+    skin_tone: string;
+    skin_tone_other: string;
+    hair_colour: string;
+    hair_length: string;
+    eye_colour: string;
+    facial_hair: string;
+    dna_status: string;
+    dental_status: string;
+    print_status: string;
+    dental_chart: DentalChartEntry[];
+    distinguishing_features: DistinguishingFeatureRow[];
+    clothing: ClothingRow[];
+    jewellery_effects: JewelleryEffectRow[];
+    id_documents: IdDocumentRow[];
+    photo_log: PhotoLogRow[];
+    notes: string;
+    signature_note: string;
+    completed_at: string;
+    chain_of_custody_hash: string;
+    source: "manual" | "pdf_scan" | "live_scan" | "mixed";
+}
+
+/** Response from the two AI-assist scan endpoints. */
+export interface ScanResult {
+    success: boolean;
+    ai_available: boolean;
+    /** Which provider actually answered — "claude" (primary) or "gemini" (fallback). */
+    provider: "claude" | "gemini" | null;
+    upload_ref: string;
+    fields: Record<string, unknown> | null;
+    confidence: Record<string, number> | null;
+    reason: string | null;
+}

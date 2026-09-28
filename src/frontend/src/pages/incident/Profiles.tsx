@@ -136,7 +136,7 @@ export default function Profiles() {
                                 <th>Reported by</th>
                                 <th>Last seen</th>
                                 <th>Reference samples</th>
-                                <th />
+                                {/* <th /> */}
                             </tr>
                         </thead>
                         <tbody>
@@ -183,7 +183,7 @@ export default function Profiles() {
                                                 )}
                                         </div>
                                     </td>
-                                    <td className="tbl-actions">
+                                    {/* <td className="tbl-actions">
                                         <Link
                                             className="btn btn-sm"
                                             to={`/incidents/${incident.incident_id}/profiles/${profile.am_id}`}
@@ -191,7 +191,7 @@ export default function Profiles() {
                                         >
                                             View / Edit
                                         </Link>
-                                    </td>
+                                    </td> */}
                                 </tr>
                             ))}
                         </tbody>

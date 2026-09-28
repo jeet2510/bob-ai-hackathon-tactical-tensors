@@ -1,11 +1,15 @@
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { clearAuth, getStoredUser } from "../auth/auth";
+import DviAssistantPanel from "./DviAssistantPanel";
+import { IconChat } from "./icons";
 
 export default function Layout({ children, sidebar }: { children: ReactNode; sidebar?: ReactNode }) {
     const navigate = useNavigate();
     const user = getStoredUser();
+    const [assistantOpen, setAssistantOpen] = useState(false);
 
     async function handleLogout() {
         try {
@@ -33,6 +37,12 @@ export default function Layout({ children, sidebar }: { children: ReactNode; sid
 
                     <div className="topbar-user">
                         {user && <span>{user.name}</span>}
+                        <button
+                            className={`btn btn-sm${assistantOpen ? " active" : ""}`}
+                            onClick={() => setAssistantOpen((v) => !v)}
+                        >
+                            <IconChat /> DVI Assistant
+                        </button>
                         <button className="btn btn-sm" onClick={handleLogout}>
                             Sign out
                         </button>
@@ -41,6 +51,8 @@ export default function Layout({ children, sidebar }: { children: ReactNode; sid
 
                 <div className="page">{children}</div>
             </div>
+
+            <DviAssistantPanel open={assistantOpen} onClose={() => setAssistantOpen(false)} />
         </div>
     );
 }

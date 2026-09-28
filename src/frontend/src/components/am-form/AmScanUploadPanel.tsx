@@ -44,7 +44,7 @@ export default function AmScanUploadPanel({
                     data.provider === "claude"
                         ? "Claude"
                         : data.provider === "gemini"
-                          ? "Gemini"
+                          ? "Bob by IBM"
                           : "AI";
                 setMessage(
                     `${providerLabel} read the form. Prefilled fields are marked "AI-suggested" — review each one before saving.`,

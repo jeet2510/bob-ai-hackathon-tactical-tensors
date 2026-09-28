@@ -305,7 +305,7 @@ function GeminiMatchPanel({
             setSummary(data.summary);
 
             if (data.candidates.length === 0) {
-                setNotice(data.reason ?? "Gemini found no credible visual match in the shortlist.");
+                setNotice(data.reason ?? "Bob by IBM found no credible visual match in the shortlist.");
             }
         } catch (caught) {
             const apiError = toApiError(caught, "Could not run the AI match.");
@@ -387,7 +387,7 @@ function GeminiMatchPanel({
                                 {(candidate.ai_rationale || candidate.ai_visual_notes) && (
                                     <>
                                         <div className="rationale-heading" style={{ marginTop: 12 }}>
-                                            Gemini notes
+                                            Bob by IBM notes
                                         </div>
                                         <p className="muted">
                                             {[candidate.ai_rationale, candidate.ai_visual_notes].filter(Boolean).join(" ")}

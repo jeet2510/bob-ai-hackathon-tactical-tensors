@@ -704,3 +704,24 @@ export interface ScanResult {
     confidence: Record<string, number> | null;
     reason: string | null;
 }
+
+/** The dashboard's on-demand AI briefing — GET /incidents/{id}/insight. */
+export interface IncidentInsight {
+    success: boolean;
+    ai_available: boolean;
+    text: string | null;
+    reason: string | null;
+}
+
+/** One turn in the DVI Assistant sidebar, held client-side only — nothing is persisted server-side. */
+export interface AssistantTurn {
+    role: "user" | "assistant";
+    text: string;
+}
+
+export interface AssistantReply {
+    success: boolean;
+    ai_available: boolean;
+    reply: string | null;
+    reason: string | null;
+}

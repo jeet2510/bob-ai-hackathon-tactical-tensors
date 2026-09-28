@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BodyController;
 use App\Http\Controllers\Api\EvaluationController;
@@ -102,6 +103,16 @@ Route::middleware('auth:sanctum')->group(function () {
         |------------------------------------------------------------------
         */
         Route::get('/evaluation', [EvaluationController::class, 'show']);
+
+        /*
+        |------------------------------------------------------------------
+        | DVI Assistant: a read-only briefing and chat sidebar over this
+        | incident's current data. Cannot record a decision, run the
+        | matcher, or change any record — see DviAssistant.
+        |------------------------------------------------------------------
+        */
+        Route::get('/insight', [AssistantController::class, 'insight']);
+        Route::post('/assistant', [AssistantController::class, 'chat']);
     });
 
     // Human-in-the-loop correction of a mis-read item.

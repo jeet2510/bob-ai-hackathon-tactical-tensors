@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/client";
+import { fetchInsight } from "../../api/assistant";
 import { toApiError } from "../../api/errors";
 import PhotoGallery from "../../components/PhotoGallery";
 import {
@@ -60,6 +61,8 @@ export default function CommandBoard() {
 
     return (
         <>
+            <IncidentInsightCard incidentId={incident.incident_id} />
+
             <div className="stat-grid">
                 <Stat value={stats.bodies} label="Bodies recovered" />
                 <Stat value={stats.profiles} label="Families reporting" />
@@ -247,6 +250,59 @@ export default function CommandBoard() {
                 </p>
             )}
         </>
+    );
+}
+
+/**
+ * On-demand, plain-language dashboard briefing — never generated
+ * automatically, matching every other AI surface in this app.
+ */
+function IncidentInsightCard({ incidentId }: { incidentId: string }) {
+    const [text, setText] = useState<string | null>(null);
+    const [busy, setBusy] = useState(false);
+    const [notice, setNotice] = useState("");
+
+    async function run() {
+        setBusy(true);
+        setNotice("");
+
+        try {
+            const { data } = await fetchInsight(incidentId);
+
+            if (data.ai_available && data.text) {
+                setText(data.text);
+            } else {
+                setNotice(data.reason ?? "AI briefing unavailable right now.");
+            }
+        } catch (caught) {
+            setNotice(toApiError(caught, "Could not generate a briefing.").message);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    return (
+        <section className="card" style={{ marginBottom: 22 }}>
+            <div className="page-head" style={{ marginBottom: text ? 10 : 0 }}>
+                <div>
+                    <h3>
+                        AI briefing <span className="badge badge-accent">Bob by IBM</span>
+                    </h3>
+                    {!text && (
+                        <p className="muted" style={{ marginTop: 4 }}>
+                            A plain-language summary of where this incident stands right now.
+                        </p>
+                    )}
+                </div>
+
+                <button className="btn btn-sm" onClick={run} disabled={busy}>
+                    {busy ? "Thinking…" : text ? "Refresh" : "Generate briefing"}
+                </button>
+            </div>
+
+            {notice && <div className="notice">{notice}</div>}
+            {text && <p>{text}</p>}
+        </section>
     );
 }
 

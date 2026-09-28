@@ -28,7 +28,7 @@ export default function ScanUploadPanel({
                 setMessage(data.reason ?? "AI assist is unavailable right now. Continue filling the form manually.");
             } else if (data.fields) {
                 onResult(data.fields, data.upload_ref, data.confidence);
-                const providerLabel = data.provider === "claude" ? "Claude" : data.provider === "gemini" ? "Gemini" : "AI";
+                const providerLabel = data.provider === "claude" ? "Claude" : data.provider === "gemini" ? "Bob by IBM" : "AI";
                 setMessage(
                     `${providerLabel} read the ${kind === "pdf" ? "form" : "photo"}. Prefilled fields are marked “AI-suggested” below — review each one.`,
                 );
@@ -45,8 +45,8 @@ export default function ScanUploadPanel({
             <h3>{kind === "pdf" ? "Scan the filled paper form" : "Live scan a body photo"}</h3>
             <p className="muted">
                 {kind === "pdf"
-                    ? "Upload a photograph or scan of the completed paper form. Gemini reads it and prefills the sections below — nothing is saved until you review and submit."
-                    : "Upload or take a photo of the body. Gemini reads what's visible and prefills condition, build and appearance — nothing is saved until you review and submit."}
+                    ? "Upload a photograph or scan of the completed paper form. Bob by IBM reads it and prefills the sections below — nothing is saved until you review and submit."
+                    : "Upload or take a photo of the body. Bob by IBM reads what's visible and prefills condition, build and appearance — nothing is saved until you review and submit."}
             </p>
 
             <FileUploadField

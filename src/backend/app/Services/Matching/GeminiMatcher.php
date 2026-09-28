@@ -91,7 +91,7 @@ class GeminiMatcher
 
         if ($picked->isEmpty()) {
             return ['run_id' => null, 'candidates' => collect(), 'ai_available' => true, 'summary' => $summary,
-                'reason' => 'Gemini found no candidate in the shortlist with credible visual or evidentiary support.'];
+                'reason' => 'Bob by IBM found no candidate in the shortlist with credible visual or evidentiary support.'];
         }
 
         return $this->persist($incident, $body, $sourceRun, $shortlist->keyBy('am_id'), $picked, $summary);

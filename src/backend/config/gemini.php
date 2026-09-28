@@ -28,6 +28,11 @@ return [
     // data, family data, and photos from both sides).
     'match_model' => env('GEMINI_MATCH_MODEL', 'gemini-flash-latest'),
 
+    // The DVI Assistant: dashboard insight + the chat sidebar. Text only —
+    // it never sees photographs, only the same aggregate numbers and
+    // reconciliation-report data already shown on screen.
+    'assistant_model' => env('GEMINI_ASSISTANT_MODEL', 'gemini-flash-latest'),
+
     'temperature' => 0.0,
 
     'max_tokens' => env('GEMINI_MAX_TOKENS', 8192),
@@ -56,5 +61,9 @@ return [
     // asked to refine. RETAINED_PER_BODY keeps up to 10; capping further here
     // keeps a single match request's image count reasonable.
     'match_shortlist_size' => env('GEMINI_MATCH_SHORTLIST_SIZE', 6),
+
+    // Independent prompt-version lines for the assistant's two call shapes —
+    // bump either on a prompt/persona change without invalidating the other.
+    'assistant_prompt_version' => 'gemini-assistant-v1',
 
 ];

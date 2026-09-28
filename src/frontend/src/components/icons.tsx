@@ -65,6 +65,31 @@ export function IconChart({ className }: IconProps) {
     );
 }
 
+export function IconChat({ className }: IconProps) {
+    return (
+        <svg {...base} className={className}>
+            <path d="M4 5.5h16a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H9.5L5 19.5V16H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1Z" />
+            <path d="M7.5 9.5h9M7.5 12.5h5.5" />
+        </svg>
+    );
+}
+
+export function IconClose({ className }: IconProps) {
+    return (
+        <svg {...base} className={className}>
+            <path d="M5 5l14 14M19 5L5 19" />
+        </svg>
+    );
+}
+
+export function IconSend({ className }: IconProps) {
+    return (
+        <svg {...base} className={className}>
+            <path d="M4 12l16-8-5.5 8L20 20 4 12Z" />
+        </svg>
+    );
+}
+
 export function IconClipboard({ className }: IconProps) {
     return (
         <svg {...base} className={className}>

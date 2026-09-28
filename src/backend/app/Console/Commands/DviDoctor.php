@@ -31,6 +31,7 @@ class DviDoctor extends Command
         'app/Services/Extraction',
         'app/Services/Matching',
         'app/Services/Reporting',
+        'app/Services/Assistant',
         'app/Models',
     ];
 

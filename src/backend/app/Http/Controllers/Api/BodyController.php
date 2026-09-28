@@ -13,6 +13,7 @@ use App\Models\PmCase;
 use App\Models\ReviewDecision;
 use App\Services\Extraction\FormScanCoordinator;
 use App\Services\Intake\PmCaseIntake;
+use App\Support\StagedUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -172,23 +173,9 @@ class BodyController extends Controller
      */
     protected function resolveStagedFiles(Incident $incident, array $data): array
     {
-        $refs = collect($data['photo_log'] ?? [])->pluck('upload_ref')->filter()->unique();
+        $refs = collect($data['photo_log'] ?? [])->pluck('upload_ref')->filter()->unique()->all();
 
-        $root = storage_path("app/private/incidents/{$incident->incident_id}/scans");
-        $resolved = [];
-
-        foreach ($refs as $ref) {
-            // Refs are UUID.ext, generated only by our own upload endpoints —
-            // still resolved through basename() so nothing outside this
-            // incident's scan directory can ever be reached.
-            $path = $root.'/'.basename((string) $ref);
-
-            if (is_file($path)) {
-                $resolved[$ref] = $path;
-            }
-        }
-
-        return $resolved;
+        return StagedUploads::resolve($incident->incident_id, $refs);
     }
     /**
      * The triage list: every recovered body with its strongest candidate.

@@ -9,6 +9,8 @@ import CommandBoard from "./pages/incident/CommandBoard";
 import NewBody from "./pages/incident/NewBody";
 import BodyReview from "./pages/incident/BodyReview";
 import Profiles from "./pages/incident/Profiles";
+import NewProfile from "./pages/incident/NewProfile";
+import PublicAmReport from "./pages/PublicAmReport";
 import Assignment from "./pages/incident/Assignment";
 import Report from "./pages/incident/Report";
 import EvaluationLab from "./pages/incident/EvaluationLab";
@@ -29,6 +31,9 @@ export default function App() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+
+            {/* Public: no login, authorised per-request by the ?token= share link. */}
+            <Route path="/report/:incidentId" element={<PublicAmReport />} />
 
             <Route
                 path="/incidents"
@@ -60,6 +65,7 @@ export default function App() {
                 <Route path="bodies/new" element={<NewBody />} />
                 <Route path="bodies/:pmId" element={<BodyReview />} />
                 <Route path="profiles" element={<Profiles />} />
+                <Route path="profiles/new" element={<NewProfile />} />
                 <Route path="assignment" element={<Assignment />} />
                 <Route path="report" element={<Report />} />
                 <Route path="evaluation" element={<EvaluationLab />} />

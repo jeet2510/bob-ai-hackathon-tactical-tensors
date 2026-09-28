@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BodyController;
 use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\IncidentController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PublicReportController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\UploadController;
@@ -15,6 +17,25 @@ Route::get('/health', fn () => response()->json([
 ]));
 
 Route::post('/login', [AuthController::class, 'login']);
+
+/*
+|--------------------------------------------------------------------------
+| Public: the ante-mortem family-report share link.
+|--------------------------------------------------------------------------
+|
+| The only unauthenticated write path in this API. No Sanctum token, no
+| session — each request instead carries a `token` (query string on the GET,
+| body on the POSTs) that PublicReportController verifies per-request
+| against ShareToken. Deliberately its own small controller, not folded into
+| SupportController/ProfileController, so the entire public attack surface
+| is one file someone can review in one sitting.
+|
+*/
+Route::prefix('public/incidents/{incident}')->group(function () {
+    Route::get('/report-context', [PublicReportController::class, 'context']);
+    Route::post('/reports', [PublicReportController::class, 'store']);
+    Route::post('/uploads', [PublicReportController::class, 'upload']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -44,11 +65,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
         /*
         |------------------------------------------------------------------
-        | Ante-mortem: family reports
+        | Ante-mortem: family reports. `store` is a coordinator entering a
+        | phoned-in report themselves; `share-link` mints the public link a
+        | family can use to submit one without logging in at all (see the
+        | public route group above, and PublicReportController).
         |------------------------------------------------------------------
         */
         Route::get('/profiles', [SupportController::class, 'profiles']);
+        Route::post('/profiles', [ProfileController::class, 'store']);
         Route::get('/profiles/{amId}', [SupportController::class, 'profile']);
+        Route::post('/profiles/share-link', [ProfileController::class, 'shareLink']);
 
         /*
         |------------------------------------------------------------------

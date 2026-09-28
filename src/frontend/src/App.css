@@ -2176,3 +2176,149 @@ details.breakdown > div {
         justify-content: center;
     }
 }
+
+/* -------------------------------------------------------- Share link (staff) */
+
+.share-link-card {
+    margin-bottom: 16px;
+}
+
+.share-link-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.share-link-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+    .share-link-row {
+        flex-direction: column;
+    }
+
+    .share-link-row .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --------------------------------------------------- Public family-report page */
+
+.public-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+}
+
+.public-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.public-header strong {
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.public-header span {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+}
+
+.public-main {
+    flex: 1;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+}
+
+.public-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    padding: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.public-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 18px;
+}
+
+.public-intro h1 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.public-intro p {
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.public-card-confirm {
+    text-align: center;
+    padding: 40px 24px;
+}
+
+.public-confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: var(--high-soft);
+    color: var(--high);
+    font-size: 1.6rem;
+    margin-bottom: 16px;
+}
+
+.public-card-confirm h1 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.public-card-confirm p {
+    color: var(--text-muted);
+    line-height: 1.55;
+    max-width: 460px;
+    margin: 0 auto 8px;
+}
+
+@media (max-width: 640px) {
+    .public-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        padding: 12px 14px;
+    }
+
+    .public-main {
+        padding: 14px 12px 32px;
+    }
+
+    .public-card {
+        padding: 16px;
+    }
+}

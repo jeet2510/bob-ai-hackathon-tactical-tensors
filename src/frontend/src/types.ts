@@ -126,6 +126,7 @@ export interface PmCase {
 
 export interface AmFile {
     am_id: string;
+    incident_id?: string;
     reported_name: string;
     sex: string | null;
     age: number | null;
@@ -135,10 +136,19 @@ export interface AmFile {
     last_seen_place: string | null;
     reported_by_relation: string | null;
     occupation: string | null;
+    marital_status: string | null;
     dna_reference_type: string | null;
     dental_records_available: boolean;
+    dentist_contact: string | null;
     prints_on_file: boolean;
+    id_sources: string | null;
     dental_chart_fdi: string | null;
+    reporter_name: string | null;
+    reporter_phone: string | null;
+    reporter_address: string | null;
+    interviewing_officer: string | null;
+    interviewed_at: string | null;
+    source_type: string | null;
 }
 
 /** One structured item read out of a form box or a photograph. */
@@ -570,6 +580,80 @@ export interface NewBodyFormState {
     completed_at: string;
     chain_of_custody_hash: string;
     source: "manual" | "pdf_scan" | "live_scan" | "mixed";
+}
+
+/* ----------------------------------------------------- Ante-mortem report */
+
+/** value matches the exact strings already in am_file.csv/AmFileIntake::validationRules() — "single" is the DB value for the paper form's "Unmarried" checkbox. */
+export const MARITAL_STATUS_OPTIONS = [
+    { value: "single", label: "Unmarried" },
+    { value: "married", label: "Married" },
+    { value: "widowed", label: "Widowed" },
+    { value: "divorced_separated", label: "Divorced/separated" },
+];
+
+/** No explicit "none" entry — the SelectField's own placeholder ("None available") covers it. */
+export const DNA_REFERENCE_OPTIONS = [
+    { value: "family_reference", label: "Family member can give one" },
+    { value: "personal_item", label: "A personal item is available (toothbrush, razor, hairbrush)" },
+];
+
+export const DENTAL_RECORDS_OPTIONS = [
+    { value: "0", label: "Not available" },
+    { value: "1", label: "Available" },
+];
+
+export const ID_SOURCE_OPTIONS = ["Passport", "Aadhaar / national ID", "Driving licence", "Prior police record"];
+
+/** Section F/G/H/I rows reuse the PM shapes (DistinguishingFeatureRow, ClothingRow, JewelleryEffectRow, IdDocumentRow). */
+export interface AmReportFormState {
+    am_id: string;
+    reported_name: string;
+    reported_by_relation: string;
+    occupation: string;
+    last_seen_at: string;
+    last_seen_place: string;
+    marital_status: string;
+    sex: string;
+    age: string;
+    height_text: string;
+    height_cm_reported: string;
+    build: string;
+    skin_tone: string;
+    skin_tone_other: string;
+    hair_colour: string;
+    hair_length: string;
+    eye_colour: string;
+    facial_hair: string;
+    dna_reference_type: string;
+    dental_records_available: boolean;
+    dentist_contact: string;
+    prints_on_file: boolean;
+    id_sources: string[];
+    recent_photo_ref: string;
+    tattoo_photo_ref: string;
+    distinguishing_features: DistinguishingFeatureRow[];
+    clothing: ClothingRow[];
+    jewellery_effects: JewelleryEffectRow[];
+    id_documents: IdDocumentRow[];
+    notes: string;
+    reporter_name: string;
+    reporter_phone: string;
+    reporter_address: string;
+    interviewing_officer: string;
+    interviewed_at: string;
+}
+
+export interface ShareLinkResult {
+    success: boolean;
+    url: string;
+    token: string;
+    expires_at: string;
+}
+
+export interface ReportContext {
+    success: boolean;
+    incident: { incident_id: string; name: string; incident_date: string };
 }
 
 /** Response from the two AI-assist scan endpoints. */

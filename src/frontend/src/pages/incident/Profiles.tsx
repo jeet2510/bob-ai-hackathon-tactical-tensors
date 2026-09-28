@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/client";
+import { getShareLink } from "../../api/reports";
 import { toApiError } from "../../api/errors";
 import { useIncident } from "../IncidentLayout";
 import type { AmFile } from "../../types";
@@ -11,6 +13,41 @@ export default function Profiles() {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [shareUrl, setShareUrl] = useState("");
+    const [shareExpires, setShareExpires] = useState("");
+    const [shareBusy, setShareBusy] = useState(false);
+    const [shareError, setShareError] = useState("");
+    const [copied, setCopied] = useState(false);
+
+    async function handleGetShareLink() {
+        setShareBusy(true);
+        setShareError("");
+
+        try {
+            const { data } = await getShareLink(incident.incident_id);
+            setShareUrl(data.url);
+            setShareExpires(data.expires_at.slice(0, 10));
+        } catch (caught) {
+            setShareError(toApiError(caught, "Could not create a shareable link.").message);
+        } finally {
+            setShareBusy(false);
+        }
+    }
+
+    async function handleShare() {
+        if ("share" in navigator) {
+            try {
+                await navigator.share({ title: "Report a missing person", url: shareUrl });
+                return;
+            } catch {
+                // User cancelled the native share sheet — fall through to copy.
+            }
+        }
+
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -46,7 +83,32 @@ export default function Profiles() {
                         in scoring — a name on a form is not evidence about a body.
                     </p>
                 </div>
+                <div className="btn-row">
+                    <button className="btn" onClick={handleGetShareLink} disabled={shareBusy}>
+                        {shareBusy ? "Creating link…" : "Get shareable family-report link"}
+                    </button>
+                    <Link className="btn btn-primary" to={`/incidents/${incident.incident_id}/profiles/new`}>
+                        + New family report
+                    </Link>
+                </div>
             </div>
+
+            {shareError && <div className="error-banner">{shareError}</div>}
+
+            {shareUrl && (
+                <div className="card share-link-card">
+                    <p className="muted">
+                        Anyone with this link can report a missing person for this incident — no login
+                        needed. It expires on {shareExpires}.
+                    </p>
+                    <div className="share-link-row">
+                        <input className="mono" readOnly value={shareUrl} onFocus={(e) => e.target.select()} />
+                        <button type="button" className="btn btn-sm" onClick={handleShare}>
+                            {copied ? "Copied!" : "share" in navigator ? "Share" : "Copy"}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {error && <div className="error-banner">{error}</div>}
 

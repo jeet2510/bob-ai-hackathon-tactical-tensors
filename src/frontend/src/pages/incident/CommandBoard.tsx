@@ -110,11 +110,11 @@ export default function CommandBoard() {
                     <RecoveryTimelineChart breakdowns={breakdowns} />
                 </section>
 
-                <section className="card chart-card">
+                {/* <section className="card chart-card">
                     <h3>Form boxes by language</h3>
                     <p className="muted">What language each source record was written in.</p>
                     <LanguageBars languages={languages} />
-                </section>
+                </section> */}
             </div>
 
             <PhotoGallery incidentId={incident.incident_id} />
